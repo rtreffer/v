@@ -58,7 +58,7 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
 
   def -(node: RTreeNode[T]) : Unit = {
     for (i <- 0 until childs) {
-      if (child(i) == node) {
+      if (child(i) eq node) {
         child(i) = child(childs - 1)
         child(childs - 1) = null
         childs -= 1
