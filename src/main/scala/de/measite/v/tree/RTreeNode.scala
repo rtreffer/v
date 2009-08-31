@@ -127,8 +127,6 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
     p - this
     p + newNodes._1
     p + newNodes._2
-    parent = null
-    child = null
   }
 
 }
