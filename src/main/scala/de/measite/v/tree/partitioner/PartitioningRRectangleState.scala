@@ -29,12 +29,14 @@ class PartitioningRRectangleState(val rect : Array[RRectangle]) extends State {
     set match {
       case -1 => { // left
         state(pos) = set
-        left = that.left + rect(pos)
+        left  = that.left + rect(pos)
+        right = that.right
         leftSet += 1
       }
       case  1 => { // right
         state(pos) = set
         right = that.right + rect(pos)
+        left  = that.left
         rightSet += 1
       }
       case  _ => { // illegal
