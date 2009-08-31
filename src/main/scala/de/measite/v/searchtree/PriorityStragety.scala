@@ -33,10 +33,11 @@ object PriorityStragety {
         if (value.isTerminal) {
           return value;
         }
+      } else {
+        childs.foreach(child => {
+          tree.put(child.score, child)
+        })
       }
-      childs.foreach(child => {
-        tree.put(child.score, child)
-      })
     }
     null
   }
