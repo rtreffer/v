@@ -27,11 +27,13 @@ class PartitioningKVectorState(val position : Array[KVector]) extends State {
     set match {
       case -1 => { // left
         state(pos) = set
-        left = that.left + position(pos)
+        left  = that.left + position(pos)
+        right = that.right
         leftSet += 1
       }
       case  1 => { // right
         state(pos) = set
+        left  = that.left
         right = that.right + position(pos)
         rightSet += 1
       }
