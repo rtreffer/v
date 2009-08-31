@@ -67,7 +67,7 @@ class PartitioningKVectorState(val position : Array[KVector]) extends State {
   }
 
   def isTerminal : Boolean = {
-    isValid && (pos == position.length - 1)
+    pos == position.length - 1
   }
 
 }
