@@ -9,11 +9,8 @@ object DoubleArrayComparator extends Comparator[Array[Double]] {
     val len = Math.min(l.length, r.length)
     for (i <- 0 until len) {
       val delta = Math.signum(l(i) - r(i))
-      delta match {
-        case  1d => { return  1 }
-        case -1d => { return -1 }
-        case   _ => {           }
-      }
+      if (delta == -1) { return -1 }
+      if (delta ==  1) { return  1 }
     }
     l.length - r.length
   }
