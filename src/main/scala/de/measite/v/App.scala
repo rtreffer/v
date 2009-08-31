@@ -13,9 +13,9 @@ object App extends Application {
     var tree = new RTree[String](10)
     var rnd = new java.util.Random()
     for (val i <- 0 to 100000) {
-      //if (i%10000 == 0) { 
+      if (i%10000 == 0) { 
         System.out.println(i)
-      //}
+      }
       val v = rnd.nextDouble
       (tree + new KVector(Array(v))) setData java.lang.Double.toString(v)
     }
