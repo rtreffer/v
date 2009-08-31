@@ -37,7 +37,7 @@ object AreaOverlapPartitioner extends Partitioner {
     var state = new PartitioningKVectorState(positions)
     var istate = state.next()(0)
     istate = PriorityStragety.search(istate)
-    if (istate == null) {
+    if (istate eq null) {
       return null
     }
     state = istate.asInstanceOf[PartitioningKVectorState]
@@ -79,7 +79,7 @@ object AreaOverlapPartitioner extends Partitioner {
     var state = new PartitioningRRectangleState(rects)
     var istate = state.next()(0)
     istate = PriorityStragety.search(istate)
-    if (istate == null) {
+    if (istate eq null) {
       return null
     }
     state = istate.asInstanceOf[PartitioningRRectangleState]
