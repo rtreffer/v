@@ -6,6 +6,6 @@ trait State {
 
   def next() : Array[State]
 
-  def isTerminal() : Boolean
+  def isTerminal() : boolean
 
 }

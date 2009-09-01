@@ -10,7 +10,7 @@ import de.measite.v.data.KVector
 object App extends Application {
   for (val r <- 1 to 5) {
     var time = -System.currentTimeMillis
-    var tree = new RTree[String](10)
+    var tree = new RTree[String](5)
     var rnd = new java.util.Random()
     for (val i <- 0 to 100000) {
       if (i%10000 == 0) { 

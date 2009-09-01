@@ -3,13 +3,17 @@ package de.measite.v.tree.partitioner
 import de.measite.v.data.KVector
 import de.measite.v.data.RRectangle
 import de.measite.v.searchtree.State
+import java.lang.Comparable
 
-class PartitioningKVectorState(val position : Array[KVector]) extends State {
+class PartitioningKVectorState(val position : Array[KVector])
+  extends State
+  with Comparable[PartitioningKVectorState] {
 
   var left  : RRectangle = new RRectangle
   var right : RRectangle = new RRectangle
   val state = new Array[int](position.length)
   var pos = 0
+  var intersection = 0d
   var leftSet = 0
   var rightSet = 0
 
@@ -42,10 +46,7 @@ class PartitioningKVectorState(val position : Array[KVector]) extends State {
       }
     }
 
-  }
-
-  def score() : Array[Double] = {
-    return Array(left.intersection(right).area1p, -pos)
+    intersection = left.intersection(right).area1p
   }
 
   def next() : Array[State] = {
@@ -68,6 +69,36 @@ class PartitioningKVectorState(val position : Array[KVector]) extends State {
 
   def isTerminal : Boolean = {
     pos == position.length - 1
+  }
+
+  override def equals(obj: Any) : boolean = {
+    if (!obj.isInstanceOf[PartitioningKVectorState]) {
+      return false
+    }
+    val that = obj.asInstanceOf[PartitioningKVectorState]
+    java.util.Arrays.equals(state, that.state)
+  }
+
+  override def hashCode : int = {
+    java.util.Arrays.hashCode(state)
+  }
+
+  override def compareTo(that: PartitioningKVectorState) : int = {
+    if (intersection < that.intersection) {
+      return -1
+    }
+    if (intersection > that.intersection) {
+      return 1
+    }
+    if (pos != that.pos) { return that.pos - pos }
+    var i = 0
+    while (i < state.length) {
+      if (state(i) != that.state(i)) {
+        return (1 - 2*(i % 2)) * (state(i) - that.state(i))
+      }
+      i += 1
+    }
+    0
   }
 
 }

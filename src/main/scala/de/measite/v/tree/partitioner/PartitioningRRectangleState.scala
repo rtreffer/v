@@ -3,7 +3,9 @@ package de.measite.v.tree.partitioner
 import de.measite.v.data.RRectangle
 import de.measite.v.searchtree.State
 
-class PartitioningRRectangleState(val rect : Array[RRectangle]) extends State {
+class PartitioningRRectangleState(val rect : Array[RRectangle])
+  extends State
+  with Comparable[PartitioningRRectangleState] {
 
   var innerOverlap = 0d
   var totalOverlap = 0d
@@ -55,10 +57,6 @@ class PartitioningRRectangleState(val rect : Array[RRectangle]) extends State {
 
   }
 
-  def score() : Array[Double] = {
-    return Array(innerOverlap, totalOverlap, -pos)
-  }
-
   def next() : Array[State] = {
     if (isTerminal) {
       return new Array[State](0)
@@ -79,6 +77,32 @@ class PartitioningRRectangleState(val rect : Array[RRectangle]) extends State {
 
   def isTerminal : Boolean = {
     isValid && (pos == rect.length - 1)
+  }
+
+  override def equals(obj: Any) : boolean = {
+    if (!obj.isInstanceOf[PartitioningKVectorState]) {
+      return false
+    }
+    val that = obj.asInstanceOf[PartitioningKVectorState]
+    java.util.Arrays.equals(this.state, that.state)
+  }
+
+  override def hashCode : int = {
+    java.util.Arrays.hashCode(state)
+  }
+
+  override def compareTo(that: PartitioningRRectangleState) : int = {
+    if (this.innerOverlap < that.innerOverlap) { return -1 }
+    if (this.innerOverlap > that.innerOverlap) { return  1 }
+    if (this.totalOverlap < that.totalOverlap) { return -1 }
+    if (this.totalOverlap > that.totalOverlap) { return  1 }
+    if (this.pos > that.pos) { return -1 }
+    if (this.pos < that.pos) { return  1 }
+    for (i <- 0 until state.length) {
+      if (this.state(i) < that.state(i)) { return -1 }
+      if (this.state(i) > that.state(i)) { return  1 }
+    }
+    0
   }
 
 }

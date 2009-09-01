@@ -1,21 +1,7 @@
 package de.measite.v.searchtree
 
-import java.util.TreeMap
+import java.util.TreeSet
 import java.util.Comparator
-
-object DoubleArrayComparator extends Comparator[Array[Double]] {
-
-  def compare(l : Array[Double], r: Array[Double]) : int = {
-    val len = Math.min(l.length, r.length)
-    for (i <- 0 until len) {
-      val delta = Math.signum(l(i) - r(i))
-      if (delta == -1) { return -1 }
-      if (delta ==  1) { return  1 }
-    }
-    l.length - r.length
-  }
-
-}
 
 /**
  * Search for the first leaf based on the leafs priorities
@@ -23,20 +9,18 @@ object DoubleArrayComparator extends Comparator[Array[Double]] {
 object PriorityStragety {
 
   def search(base : State) : State = {
-    val tree = new TreeMap[Array[Double], State](DoubleArrayComparator)
-    tree.put(base.score, base)
+    val tree = new TreeSet[State]()
+    tree.add(base)
     while (tree.size() > 0) {
-      val key = tree.firstKey();
-      val value = tree.remove(key);
-      val childs = value.next();
-      if (childs.length == 0) {
-        if (value.isTerminal) {
-          return value;
-        }
-      } else {
-        childs.foreach(child => {
-          tree.put(child.score, child)
-        })
+      val state = tree.first();
+      tree.remove(state);
+      val childs = state.next();
+      if (state.isTerminal) {
+        return state;
+      }
+      tree.add(childs(0))
+      if (childs.length > 1) {
+        tree.add(childs(1))
       }
     }
     null
