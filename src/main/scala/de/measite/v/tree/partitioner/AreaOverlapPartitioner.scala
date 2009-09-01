@@ -41,9 +41,8 @@ object AreaOverlapPartitioner extends Partitioner {
       return null
     }
     state = istate.asInstanceOf[PartitioningKVectorState]
-    val width = nodes(0).parent.asInstanceOf[RTreeNode[T]].width
-    val left  = new RTreeNode[T](width)
-    val right = new RTreeNode[T](width)
+    val left  = new RTreeNode[T](nodes.length - 1)
+    val right = new RTreeNode[T](nodes.length - 1)
     for (i <- 0 until nodes.length) {
       if (state.state(i) == -1) {
         left  + nodes(i)
@@ -83,8 +82,8 @@ object AreaOverlapPartitioner extends Partitioner {
       return null
     }
     state = istate.asInstanceOf[PartitioningRRectangleState]
-    val left  = new RTreeNode[T](nodes(0).width)
-    val right = new RTreeNode[T](nodes(0).width)
+    val left  = new RTreeNode[T](nodes.length - 1)
+    val right = new RTreeNode[T](nodes.length - 1)
     for (i <- 0 until nodes.length) {
       if (state.state(i) == -1) {
         left  + nodes(i)
