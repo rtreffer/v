@@ -1,7 +1,13 @@
 package de.measite.v.data
 
+/**
+ * A RRectangle is the Rectangle spawned by a minimum and maximum vector.
+ */
 case class RRectangle(val low: KVector, val high: KVector) {
 
+  /**
+   * Create a new zero-dimensional rectangle.
+   */
   def this() {
     this(
       new KVector(new Array[Double](0)),
@@ -9,31 +15,25 @@ case class RRectangle(val low: KVector, val high: KVector) {
     )
   }
 
+  /**
+   * Check if this area contains a vector. Return false if the vector contains
+   * dimensions unknown by this rectangle.
+   */
   def contains(that: KVector) : Boolean = {
-    (low < that && that < high)
+    ((low <= that) && (that <= high))
   }
 
+  /**
+   * Check if this rectangle contains another rectangle. False if the other
+   * rectangle contains dimensions unknown to this dimension.
+   */
   def contains(that: RRectangle) : Boolean = {
     contains(that.low) &&  contains(that.high)
   }
 
-  def newDimensions(that: KVector) : Int = {
-    var result = 0
-    low.apply(
-      that,
-      high,
-      (p,l,m,h) => {             },
-      (p,l,m)   => {             },
-      (p,l,h)   => {             },
-      (p,m,h)   => {             },
-      (p,l)     => {             },
-      (p,m)     => { result += 1 },
-      (p,h)     => {             },
-      (p)       => {             }
-    )
-    result
-  }
-
+  /**
+   * Compute the distance of this rectangle and a given vector.
+   */
   def distance(that : KVector) : Double = {
     var result = 0d
     low.apply(
@@ -57,49 +57,43 @@ case class RRectangle(val low: KVector, val high: KVector) {
     result
   }
 
-  def xdistance(that : KVector) : Double = {
-    var result = 0d
-    low.apply(
-      that,
-      high,
-      (p,l,m,h) => {
-        result += (l-m) * (l-m)
-               +  (m-h) * (m-h)
-      },
-      (p,l,m) => { result += (l-m) * (l-m) },
-      (p,l,h) => {                         },
-      (p,m,h) => { result += (m-h) * (m-h) },
-      (p,l)   => {                         },
-      (p,m)   => {                         },
-      (p,h)   => {                         },
-      (p)     => {                         }
-    )
-    result
-  }
-
+  /**
+   * Add another area, return a rectangle containing both areas
+   */
   def +(that: RRectangle) : RRectangle = {
-    new RRectangle(
-      this.low .min(that.low),
-      this.high.max(that.high)
-    )
+    if (this contains that) {
+      this
+    } else {
+      new RRectangle(
+        this.low .min(that.low),
+        this.high.max(that.high)
+      )
+    }
   }
 
+  /**
+   * Add another vector, return a rectangle containing the new vector
+   */
   def +(that: KVector) : RRectangle = {
     if (this contains that) {
-      return this
+      this
+    } else {
+      new RRectangle(
+        this.low .min(that),
+        this.high.max(that)
+      )
     }
-    new RRectangle(
-      this.low .min(that),
-      this.high.max(that)
-    )
   }
 
+  /**
+   * Compute the intersection with another area
+   */
   def intersection(that: RRectangle) = {
     val maxlow  = this.low  max that.low
     val minhigh = this.high min that.high
     val len =
       Math.max(
-        Math.max(this.low. dimension.length, that.low. dimension.length),
+        Math.max(this.low .dimension.length, that.low .dimension.length),
         Math.max(this.high.dimension.length, that.high.dimension.length)
       )
     val low  = new Array[Double](len)
@@ -116,6 +110,14 @@ case class RRectangle(val low: KVector, val high: KVector) {
     new RRectangle(new KVector(low), new KVector(high))
   }
 
+  /**
+   * Compute the area of this rectangle such that
+   * <ul>
+   *   <li>result  = 1</li>
+   *   <li>result *= (high(i) - low(i) + 1) // for every i</li>
+   *   <li>result  = result - 1</li>
+   * </ul>
+   */
   def area1p : Double = {
     var result = 1d
     low.apply(
