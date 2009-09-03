@@ -7,9 +7,18 @@ import java.lang.Double.isNaN
  * 
  * The internal representation is an array with some syntax
  * sugar on top.
+ * 
+ * This class is collections safe. It implements a partial ordering
+ * as well as comparable, equals and hashcode.
  */
-case class KVector(dimension: Array[Double]) {
+case class KVector(dimension: Array[Double])
+  extends Comparable[KVector] {
 
+    /**
+     * Helper function to apply a function to every element, handling NaN
+     * as "not set".
+     */
+    // TODO: ugly code
   def apply(
     set   : (Int, Double) => Unit,
     unset : (Int) => Unit
@@ -266,9 +275,13 @@ case class KVector(dimension: Array[Double]) {
     result
   }
 
+  /**
+   * Transform this vector into a string representation.
+   * Implicitly called by "" + kvector.
+   */
   override def toString() : String = {
     val sb = new StringBuilder()
-    sb append "v<"
+    sb append "KVector<"
     var init = true
     apply(
       (i,v) => {
@@ -286,6 +299,77 @@ case class KVector(dimension: Array[Double]) {
     )
     sb append ">"
     sb.toString()
+  }
+
+  /**
+   * Two vectors are equal if the set dimension on both vectors match.
+   */
+  override def equals(obj : Any) : boolean = {
+    if ((obj == null)||(!obj.isInstanceOf[KVector])) {
+      return false
+    } else {
+      val that = obj.asInstanceOf[KVector]
+      var result = true
+      apply(
+        that,
+        (p,l,r) => { result &= l == r },
+        (p,l)   => { result  = false  },
+        (p,r)   => { result  = false  },
+        (p)     => {                  }
+      )
+      result
+    }
+  }
+
+  /**
+   * The hashCode of a KVector is defined by the position and value of all
+   * set dimensions.
+   */
+  override def hashCode() : int = {
+    val prime = 31
+    var result = 0
+    apply(
+      (p,v) => {
+          val k = java.lang.Double.doubleToLongBits(v)
+          result = p*result + prime
+          result = p*result + (k % p).asInstanceOf[int]
+      },
+      (p)   => { }
+    )
+    result
+  }
+
+  /**
+   * Compares two KVectors by comparing all set dimensions.
+   * Let k,v be KVectors.
+   * Let i be a dimension index such that
+   * <ul>
+   *   <li>k(i) is the value of the ith dimension of k</li>
+   *   <li>v(i) is the value of the ith dimension of v</li>
+   *   <li>i is minimal with k(i) != v(i)</li>
+   * <ul>
+   * Under these preconditions
+   * <ul>
+   *   <li>k.compareTo(v) => -1 if v(i) is NaN</li>
+   *   <li>k.compareTo(v) =>  1 if k(i) is NaN</li>
+   *   <li>k.compareTo(v) => -1 if k(i) &lt; v(i)</li>
+   *   <li>k.compareTo(v) =>  1 if k(i) &gt; v(i)</li>
+   * </ul>
+   */
+  override def compareTo(that: KVector) : int = {
+    var result = 0
+    apply(
+      that,
+      (p,l,r) => {
+        if (result == 0) {
+          result = Math.signum(l - r).asInstanceOf[int]
+        }
+      },
+      (p,l)   => { if (result == 0) { result = -1 } },
+      (p,r)   => { if (result == 0) { result =  1 } },
+      (p)     => { }
+    )
+    result
   }
 
 }
