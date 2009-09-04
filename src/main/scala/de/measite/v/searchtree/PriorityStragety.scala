@@ -1,29 +1,41 @@
 package de.measite.v.searchtree
 
 import java.util.TreeSet
-import java.util.Comparator
 
 /**
- * Search for the first leaf based on the leafs priorities
+ * Search for the first leaf based on the leafs priorities.
+ * States have to implement a natural partial ordering and
+ * should be collection safe. This means that ever State should
+ * override compareTo,hashCode and equals.
  */
 object PriorityStragety {
 
+  /**
+   * Perform a search, starting with a base state.
+   * <ul>
+   *   <li>The state implementation must implement compareTo</li>
+   *   <li>Child states must be greater or equal to the active state</li>
+   * </ul>
+   */
   def search(base : State) : State = {
     val tree = new TreeSet[State]()
     tree.add(base)
-    while (tree.size() > 0) {
+    var result : State = null
+
+    while (tree.size() > 0 && result == null) {
       val state = tree.first();
       tree.remove(state);
-      val childs = state.next();
       if (state.isTerminal) {
-        return state;
-      }
-      tree.add(childs(0))
-      if (childs.length > 1) {
-        tree.add(childs(1))
+        result = state;
+      } else {
+        val childs = state.next();
+        for (child <- childs) {
+          tree.add(child)
+        }
       }
     }
-    null
+
+    result
   }
 
 }
