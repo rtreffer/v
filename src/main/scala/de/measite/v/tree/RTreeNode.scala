@@ -4,12 +4,29 @@ import de.measite.v.data.RRectangle
 import de.measite.v.data.KVector
 import de.measite.v.tree.partitioner.AreaOverlapPartitioner
 
-case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
+/**
+ * A tree node, the most intelligent class within the tree.
+ */
+case class RTreeNode[T](width: Int)
+  extends  RTreeParent
+  with     RTreeElement {
 
+  /**
+   * The bounding box of this subtree.
+   */
   var rectangle = new RRectangle()
+  /**
+   * The number of non-null children
+   */
   var childs = 0
-  var child = new Array[RTreeElement](width + 1)
+  /**
+   * The child array
+   */
+  val child = new Array[RTreeElement](width + 1)
 
+  /**
+   * A simple foreach facility. This method hides the leaflevel complexity.
+   */
   def foreach(
     leaf: (Int, RTreeLeaf[T]) => Unit,
     node: (Int, RTreeNode[T]) => Unit
@@ -39,12 +56,18 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
     (childs == 0) || child(0).isInstanceOf[RTreeLeaf[_]]
   }
 
+  /**
+   * Add a now leaf node at this level.
+   */
   def +(position: KVector) : RTreeLeaf[T] = {
     val result = new RTreeLeaf[T](position)
     this + result
     result
   }
 
+  /**
+   * Add a child element at this level.
+   */
   def +(c: RTreeElement) : Unit = {
     child(childs) = c
     c.parent = this
@@ -56,17 +79,22 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
     if (childs > width) { split() }
   }
 
+  /**
+   * Remove a child from this level. Checks the elments by reference.
+   */
   def -(node: RTreeNode[T]) : Unit = {
     for (i <- 0 until childs) {
       if (child(i) eq node) {
         child(i) = child(childs - 1)
         child(childs - 1) = null
         childs -= 1
-        return
       }
     }
   }
 
+  /**
+   * Recursively update the bounding box.
+   */
   private def chainBounds(position: KVector) {
     if (rectangle contains position) {
       return
@@ -81,6 +109,9 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
     parent.asInstanceOf[RTreeNode[T]].chainBounds(position)
   }
 
+  /**
+   * Recursively update the bounding box.
+   */
   private def chainBounds(position: RRectangle) {
     if (rectangle contains position) {
       return
@@ -103,6 +134,9 @@ case class RTreeNode[T](width: Int) extends RTreeParent with RTreeElement {
     )
   }
 
+  /**
+   * Split logic, in case this node overflows.
+   */
   def split() : Unit = {
     val newNodes =
       if (isLeafLevel) {
