@@ -126,19 +126,11 @@ case class RTreeNode[T](width: Int)
     parent.asInstanceOf[RTreeNode[T]].chainBounds(position)
   }
 
-  private def recomputeRectangle() : Unit = {
-    rectangle = new RRectangle()
-    foreach(
-      (i, l) => { rectangle += l.position  },
-      (i, n) => { rectangle += n.rectangle }
-    )
-  }
-
   /**
    * Split logic, in case this node overflows.
    */
   def split() : Unit = {
-    val newNodes =
+    val nodes =
       if (isLeafLevel) {
         var c = new Array[RTreeLeaf[T]](childs)
         System.arraycopy(child, 0, c, 0, childs)
@@ -149,18 +141,32 @@ case class RTreeNode[T](width: Int)
         AreaOverlapPartitioner.split[T](c)
       }
     if (isRoot) {
-      for (i <- 0 until childs) {
-        child(i) = null
-      }
-      childs = 0
-      this + newNodes._1
-      this + newNodes._2
-      return
+      splitRoot(nodes._1, nodes._2)
+    } else {
+      splitReplace(nodes._1, nodes._2)
     }
+  }
+
+  private def splitRoot(
+    left  : RTreeNode[T],
+    right : RTreeNode[T]
+  ) : Unit = {
+    for (i <- 0 until childs) {
+      child(i) = null
+    }
+    childs = 0
+    this + left
+    this + right
+  }
+
+  private def splitReplace(
+    left  : RTreeNode[T],
+    right : RTreeNode[T]
+  ) : Unit = {
     val p = parent.asInstanceOf[RTreeNode[T]]
     p - this
-    p + newNodes._1
-    p + newNodes._2
+    p + left
+    p + right
   }
 
 }
