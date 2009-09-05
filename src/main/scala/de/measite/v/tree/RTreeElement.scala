@@ -1,6 +1,13 @@
 package de.measite.v.tree
 
+/**
+ * Class for RTree elements.
+ */
 trait RTreeElement {
-    var parent : RTreeParent = _
-  }
+
+  /**
+   * Parent of this RTree element.
+   */
+  var parent : RTreeParent = _
+}
 
