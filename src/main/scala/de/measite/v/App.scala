@@ -17,7 +17,8 @@ object App extends Application {
         System.out.println(i)
       }
       val v = rnd.nextDouble
-      (tree + new KVector(Array(v))) setData java.lang.Double.toString(v)
+      val leaf = (tree + new KVector(Array(v)))
+      leaf.data = java.lang.Double.toString(v)
     }
     time += System.currentTimeMillis
     System.out.println("100000 ops in " + time + "ms")
