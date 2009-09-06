@@ -98,11 +98,9 @@ class PartitioningKVectorState(val position : Array[KVector])
       var result = 0
       var i = 0
       while (i < state.length && result == 0) {
-        if (state(i) != that.state(i)) {
-          result = (state(i) - that.state(i))
-          if (i % 2 == 1) {
-            result = -result
-          }
+        result = (state(i) - that.state(i))
+        if (i % 2 == 1) {
+          result = -result
         }
         i += 1
       }
