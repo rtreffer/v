@@ -1,19 +1,52 @@
 package de.measite.v.tree
 
+import java.lang.UnsupportedOperationException
 import java.util.TreeMap
 
 import de.measite.v.data.KVector
 
-case class NearestLeafIterator[T](position: KVector, root: RTreeNode[T]) {
+class NearestLeafIterator[T](
+  position: KVector,
+  root: RTreeNode[T]
+) extends java.util.Iterator[RTreeLeaf[T]] {
 
-    val best = new TreeMap[Double, RTreeLeaf[T]]()
-    val border = new TreeMap[Double, RTreeNode[T]]()
+    private val best = new TreeMap[Double, RTreeLeaf[T]]()
+    private val border = new TreeMap[Double, RTreeNode[T]]()
+    private var _next : RTreeLeaf[T] = _
+    private var _cur  : RTreeLeaf[T] = _
+    private var _hasNext = true
 
     {
       border.put(root.rectangle.distance(position), root)
     }
 
+    def hasNext() : boolean = {
+      if (!hasNext) {
+        false
+      } else {
+        if (_next eq null) { _next = inext() }
+        if (_next eq null) {
+          _hasNext = false
+        }
+        _hasNext
+      }
+    }
+
     def next() : RTreeLeaf[T] = {
+      if (!hasNext) {
+        throw new IllegalStateException
+      }
+      if (_next eq null) { _next = inext() }
+      _cur  = _next
+      _next = null
+      _cur
+    }
+
+    def remove() : Unit = {
+      throw new UnsupportedOperationException
+    }
+
+    def inext() : RTreeLeaf[T] = {
       while (border.size > 0
          && (best.size == 0 || border.firstKey < best.firstKey)
       ) {
