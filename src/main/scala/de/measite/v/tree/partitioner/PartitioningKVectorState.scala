@@ -51,14 +51,15 @@ class PartitioningKVectorState(val position : Array[KVector])
 
   def next() : Array[State] = {
     if (isTerminal) {
-      return new Array[State](0)
-    }
-    val l = new PartitioningKVectorState(this, -1)
-    val r = new PartitioningKVectorState(this,  1)
-    if (l.isValid) {
-      if (r.isValid) { Array(l, r) } else { Array(l) }
+      new Array[State](0)
     } else {
-      if (r.isValid) { Array(r)    } else { Array()  }
+      val l = new PartitioningKVectorState(this, -1)
+      val r = new PartitioningKVectorState(this,  1)
+      if (l.isValid) {
+        if (r.isValid) { Array(l, r) } else { Array(l) }
+      } else {
+        if (r.isValid) { Array(r)    } else { Array()  }
+      }
     }
   }
 
@@ -73,10 +74,11 @@ class PartitioningKVectorState(val position : Array[KVector])
 
   override def equals(obj: Any) : boolean = {
     if (!obj.isInstanceOf[PartitioningKVectorState]) {
-      return false
+      false
+    } else {
+      val that = obj.asInstanceOf[PartitioningKVectorState]
+      java.util.Arrays.equals(state, that.state)
     }
-    val that = obj.asInstanceOf[PartitioningKVectorState]
-    java.util.Arrays.equals(state, that.state)
   }
 
   override def hashCode : int = {
@@ -85,20 +87,27 @@ class PartitioningKVectorState(val position : Array[KVector])
 
   override def compareTo(that: PartitioningKVectorState) : int = {
     if (intersection < that.intersection) {
-      return -1
-    }
+      -1
+    } else
     if (intersection > that.intersection) {
-      return 1
-    }
-    if (pos != that.pos) { return that.pos - pos }
-    var i = 0
-    while (i < state.length) {
-      if (state(i) != that.state(i)) {
-        return (1 - 2*(i % 2)) * (state(i) - that.state(i))
+       1
+    } else
+    if (pos != that.pos) {
+      that.pos - pos
+    } else {
+      var result = 0
+      var i = 0
+      while (i < state.length && result == 0) {
+        if (state(i) != that.state(i)) {
+          result = (state(i) - that.state(i))
+          if (i % 2 == 1) {
+            result = -result
+          }
+        }
+        i += 1
       }
-      i += 1
+      result
     }
-    0
   }
 
 }
