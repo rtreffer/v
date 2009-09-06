@@ -89,8 +89,8 @@ case class RRectangle(val low: KVector, val high: KVector) {
    * Compute the intersection with another area
    */
   def intersection(that: RRectangle) = {
-    val maxlow  = this.low  max that.low
-    val minhigh = this.high min that.high
+    val maxlow  = this.low .max(that.low,  false)
+    val minhigh = this.high.min(that.high, false)
     val len =
       Math.max(
         Math.max(this.low .dimension.length, that.low .dimension.length),

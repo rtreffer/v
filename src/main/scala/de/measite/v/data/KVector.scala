@@ -177,31 +177,35 @@ case class KVector(dimension: Array[Double])
     v
   }
 
-  def min(that: KVector) : KVector = {
+  def min(that: KVector, merge: boolean) : KVector = {
     val len = Math.max(dimension.length, that.dimension.length)
     val result = new Array[Double](len)
     apply(
       that,
-      (p,u,v) => { result(p) = Math.min(u, v) },
-      (p,u)   => { result(p) = u              },
-      (p,v)   => { result(p) = v              },
-      (p)     => { result(p) = Double.NaN     }
+      (p,u,v) => { result(p) = Math.min(u, v)                       },
+      (p,u)   => { result(p) = if (merge) { u } else { Double.NaN } },
+      (p,v)   => { result(p) = if (merge) { v } else { Double.NaN } },
+      (p)     => { result(p) = Double.NaN                           }
     )
     new KVector(result)
   }
 
-  def max(that: KVector) : KVector = {
+  def min(that: KVector) : KVector = min(that, true)
+
+  def max(that: KVector, merge: boolean) : KVector = {
     val len = Math.max(this.dimension.length, that.dimension.length)
     val result = new Array[Double](len)
     apply(
       that,
-      (p,u,v) => { result(p) = Math.max(u, v) },
-      (p,u)   => { result(p) = u              },
-      (p,v)   => { result(p) = v              },
-      (p)     => { result(p) = Double.NaN     }
+      (p,u,v) => { result(p) = Math.max(u, v)                       },
+      (p,u)   => { result(p) = if (merge) { u } else { Double.NaN } },
+      (p,v)   => { result(p) = if (merge) { v } else { Double.NaN } },
+      (p)     => { result(p) = Double.NaN                           }
     )
     new KVector(result)
   }
+
+  def max(that: KVector) : KVector = max(that, true)
 
   /**
    * Compare this vector with a second vector.
