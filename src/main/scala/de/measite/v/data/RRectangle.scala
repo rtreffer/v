@@ -130,4 +130,18 @@ case class RRectangle(val low: KVector, val high: KVector) {
     result - 1d
   }
 
+  override def toString() : String = {
+    val sb = new StringBuilder()
+    sb.append("RRectangle<")
+    low.apply(
+      high,
+      (p,l,h) => { sb.append("(" + p + "," + l + "," + h + ")") },
+      (p,l)   => {                                              },
+      (p,h)   => {                                              },
+      (p)     => {                                              }
+    )
+    sb.append(">")
+    sb.toString
+  }
+
 }
