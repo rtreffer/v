@@ -1,6 +1,7 @@
 package de.measite.v.tree
 
 import java.util.ArrayList
+import java.util.Iterator
 
 import de.measite.v.data.KVector
 import de.measite.v.data.RRectangle
@@ -27,6 +28,10 @@ case class RTree[T](width: Int) extends RTreeParent {
     val search = new NearestNodeIterator(position, root)
     var result = search.next()
     result + position
+  }
+
+  def search(position: KVector) : Iterator[RTreeLeaf[T]] = {
+    new NearestLeafIterator(position, root)
   }
 
   /**
