@@ -9,13 +9,13 @@ class PartitioningKVectorState(val position : Array[KVector])
   extends State
   with Comparable[PartitioningKVectorState] {
 
-  var left  : RRectangle = new RRectangle
-  var right : RRectangle = new RRectangle
+  private var left  : RRectangle = new RRectangle
+  private var right : RRectangle = new RRectangle
+  private var pos = 0
+  private var intersection = 0d
+  private var leftSet = 0
+  private var rightSet = 0
   val state = new Array[int](position.length)
-  var pos = 0
-  var intersection = 0d
-  var leftSet = 0
-  var rightSet = 0
 
   def this(that: PartitioningKVectorState, set: int) = {
     this(that.position)
