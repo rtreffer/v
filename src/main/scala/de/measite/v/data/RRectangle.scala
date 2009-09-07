@@ -2,8 +2,14 @@ package de.measite.v.data
 
 /**
  * A RRectangle is the Rectangle spawned by a minimum and maximum vector.
+ *
+ * This class is collections safe. It implements equals, compareTo and
+ * hashCode
  */
-case class RRectangle(val low: KVector, val high: KVector) {
+case class RRectangle(
+  val low: KVector,
+  val high: KVector
+) extends Comparable[RRectangle] {
 
   /**
    * Create a new zero-dimensional rectangle.
@@ -142,6 +148,27 @@ case class RRectangle(val low: KVector, val high: KVector) {
     )
     sb.append(">")
     sb.toString
+  }
+
+  override def equals(obj : Any) : boolean = {
+    if ((obj == null)||(!obj.isInstanceOf[RRectangle])) {
+      return false
+    } else {
+      val that = obj.asInstanceOf[RRectangle]
+      that.low.equals(this.low) && that.high.equals(this.high)
+    }
+  }
+  override def hashCode() : int = {
+    low.hashCode * 31 + high.hashCode
+  }
+
+  override def compareTo(that: RRectangle) : int = {
+    val v = this.low.compareTo(that.low)
+    if (v != 0) {
+      v
+    } else {
+      this.high.compareTo(that.high)
+    }
   }
 
 }
