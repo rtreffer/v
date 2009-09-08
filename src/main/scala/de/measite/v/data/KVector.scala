@@ -163,10 +163,10 @@ case class KVector(dimension: Array[Double])
     var result = 0d
     apply(
       that,
-      (p,u,v) => { val d = u - v; result += d * d },
-      (p,u)   => {                                },
-      (p,v)   => {                                },
-      (p)     => {                                }
+      (p,u,v) => { result += (u - v) * (u - v) },
+      (p,u)   => {                             },
+      (p,v)   => {                             },
+      (p)     => {                             }
     )
     result
   }
