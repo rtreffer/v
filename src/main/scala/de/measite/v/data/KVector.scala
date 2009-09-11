@@ -214,32 +214,32 @@ case class KVector(dimension: Array[Double])
    * greater than or equal to the other vectors
    * component)
    */
-  def <(that: KVector) : Boolean = this < (that, true)
-
-  def <(that: KVector, strict: Boolean) : Boolean = {
-    var result = true
-    apply(
-      that,
-      (p,u,v) => { result &= (u <  v) },
-      (p,u)   => { result &= !strict  },
-      (p,v)   => { result &= !strict  },
-      (p)     => {                    }
-    )
-    result
+  def <(that: KVector) : Boolean = {
+    compareTo(that) <  0
   }
 
-  def <=(that: KVector) : Boolean = this <= (that, true)
+  def <(that: KVector, strict: Boolean) : Boolean = {
+    val compare =
+      if (strict) {
+        compareTo(that)
+      } else {
+        compareToIgnoreUnset(that)
+      }
+    compare < 0
+  }
+
+  def <=(that: KVector) : Boolean = {
+    compareTo(that) <= 0
+  }
 
   def <=(that: KVector, strict: Boolean) : Boolean = {
-    var result = true
-    apply(
-      that,
-      (p,u,v) => { result &= (u <= v) },
-      (p,u)   => { result &= !strict  },
-      (p,v)   => { result &= !strict  },
-      (p)     => {                    }
-    )
-    result
+    val compare =
+      if (strict) {
+        compareTo(that)
+      } else {
+        compareToIgnoreUnset(that)
+      }
+    compare < 0
   }
 
   /**
@@ -248,35 +248,31 @@ case class KVector(dimension: Array[Double])
    * than the other vector.
    */
   def >(that: KVector) : Boolean = {
-    this > (that, true)
+    compareTo(that) > 0
   }
 
   def >(that: KVector, strict: Boolean) : Boolean = {
-    var result = true
-    apply(
-      that,
-      (p,u,v) => { result &= (u >  v) },
-      (p,u)   => { result &= !strict  },
-      (p,v)   => { result &= !strict  },
-      (p)     => {                    }
-    )
-    result
+    val compare =
+      if (strict) {
+        compareTo(that) 
+      } else { 
+        compareToIgnoreUnset(that)
+      }
+    compare >  0
   }
 
   def >=(that: KVector) : Boolean = {
-    this >= (that, true)
+    compareTo(that) >= 0
   }
 
   def >=(that: KVector, strict: Boolean) : Boolean = {
-    var result = true
-    apply(
-      that,
-      (p,u,v) => { result &= (u >= v) },
-      (p,u)   => { result &= !strict  },
-      (p,v)   => { result &= !strict  },
-      (p)     => {                    }
-    )
-    result
+    val compare = 
+      if (strict) {
+        compareTo(that)
+      } else {
+        compareToIgnoreUnset(that)
+      }
+    compare >= 0
   }
 
   /**
@@ -361,19 +357,38 @@ case class KVector(dimension: Array[Double])
    * </ul>
    */
   override def compareTo(that: KVector) : int = {
-    var result = 0
-    apply(
-      that,
-      (p,l,r) => {
-        if (result == 0) {
-          result = Math.signum(l - r).asInstanceOf[int]
-        }
-      },
-      (p,l)   => { if (result == 0) { result = -1 } },
-      (p,r)   => { if (result == 0) { result =  1 } },
-      (p)     => { }
-    )
-    result
+    var i = 0
+    val thislen = this.dimension.length
+    val thatlen = that.dimension.length
+    val limit = Math.max(thislen, thatlen)
+    while (i < limit) {
+      val l = if (i >= thislen) { Double.NaN } else { this.dimension(i) }
+      val r = if (i >= thatlen) { Double.NaN } else { that.dimension(i) }
+      if (isNaN(l)) {
+        if (!isNaN(r)) { return -1 }
+      } else {
+        if ( isNaN(r)) { return  1 }
+        if ( l < r   ) { return -1 }
+        if ( l > r   ) { return  1 }
+      }
+      i += 1
+    }
+    0
+  }
+
+  def compareToIgnoreUnset(that: KVector) : int = {
+    val limit = Math.min(this.dimension.length, that.dimension.length)
+    var i = 0
+    while (i < limit) {
+      val l = this.dimension(i)
+      val r = that.dimension(i)
+      if ((!isNaN(l)) && (!isNaN(r))) {
+        if ( l < r ) { return -1 }
+        if ( l > r ) { return  1 }
+      }
+      i += 1
+    }
+    0
   }
 
 }
