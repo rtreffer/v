@@ -95,8 +95,9 @@ case class KVector(dimension: Array[Double])
     val lenl = l.dimension.length
     val lenm = m.dimension.length
     val lenr = r.dimension.length
+    val len = Math.max(Math.max(lenl, lenm), lenr)
     var i = 0
-    while (i < lenl || i < lenm || i < lenr) {
+    while (i < len) {
       val vl = if (i < lenl) { l.dimension(i) } else { Double.NaN }
       val vm = if (i < lenm) { m.dimension(i) } else { Double.NaN }
       val vr = if (i < lenr) { r.dimension(i) } else { Double.NaN }
