@@ -135,10 +135,6 @@ case class KVector(dimension: Array[Double])
     new KVector(dimension.map(x => {d*x}))
   }
 
-  /*
-   * The following methods are implemented based on apply.
-   */
-
   /**
    * Add two vectors. Return a new vector of the
    * combined elements.
@@ -159,15 +155,18 @@ case class KVector(dimension: Array[Double])
   /**
    * Difference as metric distance.
    */
-  def -(that: KVector) : Double = {
+  def distance(that: KVector) : Double = {
     var result = 0d
-    apply(
-      that,
-      (p,u,v) => { result += (u - v) * (u - v) },
-      (p,u)   => {                             },
-      (p,v)   => {                             },
-      (p)     => {                             }
-    )
+    val limit = Math.min(this.dimension.length, that.dimension.length)
+    var i = 0
+    while (i < limit) {
+      val l = this.dimension(i)
+      val r = that.dimension(i)
+      if ((!isNaN(l)) && (!isNaN(r))) {
+        result += (l - r) * (l - r)
+      }
+      i += 1
+    }
     result
   }
 
@@ -178,30 +177,66 @@ case class KVector(dimension: Array[Double])
   }
 
   def min(that: KVector, merge: boolean) : KVector = {
-    val len = Math.max(dimension.length, that.dimension.length)
-    val result = new Array[Double](len)
-    apply(
-      that,
-      (p,u,v) => { result(p) = Math.min(u, v)                       },
-      (p,u)   => { result(p) = if (merge) { u } else { Double.NaN } },
-      (p,v)   => { result(p) = if (merge) { v } else { Double.NaN } },
-      (p)     => { result(p) = Double.NaN                           }
-    )
+    val thislen = this.dimension.length
+    val thatlen = that.dimension.length
+    val result = new Array[Double](Math.max(thislen, thatlen))
+    var i = 0
+    val l = if (thislen >= thatlen) { dimension } else { that.dimension }
+    val r = if (l ne dimension)     { dimension } else { that.dimension }
+    System.arraycopy(l, 0, result, 0, result.length)
+    while (i < r.length) {
+      val v = r(i)
+      if (isNaN(v)) {
+        if (!merge) { result(i) = Double.NaN }
+      } else {
+        val u = result(i)
+        if (isNaN(u)) {
+          if (merge) { result(i) = v }
+        } else {
+          if ( v < u ) { result(i) = v }
+        }
+      }
+      i += 1
+    }
+    if (!merge) {
+      while (i < result.length) {
+        result(i) = Double.NaN
+        i += 1
+      }
+    }
     new KVector(result)
   }
 
   def min(that: KVector) : KVector = min(that, true)
 
   def max(that: KVector, merge: boolean) : KVector = {
-    val len = Math.max(this.dimension.length, that.dimension.length)
-    val result = new Array[Double](len)
-    apply(
-      that,
-      (p,u,v) => { result(p) = Math.max(u, v)                       },
-      (p,u)   => { result(p) = if (merge) { u } else { Double.NaN } },
-      (p,v)   => { result(p) = if (merge) { v } else { Double.NaN } },
-      (p)     => { result(p) = Double.NaN                           }
-    )
+    val thislen = this.dimension.length
+    val thatlen = that.dimension.length
+    val result = new Array[Double](Math.max(thislen, thatlen))
+    var i = 0
+    val l = if (thislen >= thatlen) { dimension } else { that.dimension }
+    val r = if (l ne dimension)     { dimension } else { that.dimension }
+    System.arraycopy(l, 0, result, 0, result.length)
+    while (i < r.length) {
+      val v = r(i)
+      if (isNaN(v)) {
+        if (!merge) { result(i) = Double.NaN }
+      } else {
+        val u = result(i)
+        if (isNaN(u)) {
+          if (merge) { result(i) = v }
+        } else {
+          if ( v > u ) { result(i) = v }
+        }
+      }
+      i += 1
+    }
+    if (!merge) {
+      while (i < result.length) {
+        result(i) = Double.NaN
+        i += 1
+      }
+    }
     new KVector(result)
   }
 
