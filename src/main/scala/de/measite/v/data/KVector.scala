@@ -367,8 +367,8 @@ case class KVector(dimension: Array[Double])
     apply(
       (p,v) => {
           val k = java.lang.Double.doubleToLongBits(v)
-          result = p*result + prime
-          result = p*result + (k % p).asInstanceOf[int]
+          result = prime*result + p
+          result = prime*result + k.asInstanceOf[int]
       },
       (p)   => { }
     )
