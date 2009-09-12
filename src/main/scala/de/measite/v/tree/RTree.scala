@@ -26,8 +26,7 @@ case class RTree[T](width: Int) extends RTreeParent {
    */
   def +(position: KVector) : RTreeLeaf[T] = {
     val search = new NearestNodeIterator(position, root)
-    var result = search.next()
-    result + position
+    search.next() + position
   }
 
   def search(position: KVector) : Iterator[RTreeLeaf[T]] = {
