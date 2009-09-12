@@ -7,11 +7,11 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
   extends State
   with Comparable[PartitioningRRectangleState] {
 
-  var innerOverlap = 0d
-  var totalOverlap = 0d
   var left  : RRectangle = new RRectangle
+  var la                 = 1d
   var right : RRectangle = new RRectangle
-  var total : RRectangle = new RRectangle
+  var ra                 = 1d
+  var areaScore = 1d
   val state = new Array[int](rect.length)
   var pos = 0
   var leftSet = 0
@@ -32,13 +32,17 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
       case -1 => { // left
         state(pos) = set
         left  = that.left + rect(pos)
+        la    = if (left eq that.left) { that.la } else { left.area1p }
         right = that.right
+        ra    = that.ra
         leftSet += 1
       }
       case  1 => { // right
         state(pos) = set
         right = that.right + rect(pos)
+        ra    = if (right eq that.right) { that.ra } else { right.area1p }
         left  = that.left
+        la    = that.la
         rightSet += 1
       }
       case  _ => { // illegal
@@ -46,14 +50,7 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
       }
     }
 
-    total = that.total + rect(pos)
-
-    totalOverlap = left.intersection(right).area1p
-    for (i <- 0 until pos) {
-      if (state(i) != set) {
-        innerOverlap += rect(i).intersection(rect(pos)).area1p
-      }
-    }
+    areaScore = la + ra
 
   }
 
@@ -92,10 +89,8 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
   }
 
   override def compareTo(that: PartitioningRRectangleState) : int = {
-    if (this.innerOverlap < that.innerOverlap) { return -1 }
-    if (this.innerOverlap > that.innerOverlap) { return  1 }
-    if (this.totalOverlap < that.totalOverlap) { return -1 }
-    if (this.totalOverlap > that.totalOverlap) { return  1 }
+    if (this.areaScore < that.areaScore) { return -1 }
+    if (this.areaScore > that.areaScore) { return  1 }
     if (this.pos > that.pos) { return -1 }
     if (this.pos < that.pos) { return  1 }
     for (i <- 0 until state.length) {
