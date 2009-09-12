@@ -1,5 +1,7 @@
 package de.measite.v.data
 
+import java.lang.Double.isNaN
+
 /**
  * A RRectangle is the Rectangle spawned by a minimum and maximum vector.
  *
@@ -42,24 +44,25 @@ case class RRectangle(
    */
   def distance(that : KVector) : Double = {
     var result = 0d
-    low.apply(
-      that,
-      high,
-      (p,l,m,h) => {
-        if (m < l) {
-          result += (l-m) * (l-m)
-        } else if (m > h) {
-          result += (m-h) * (m-h)
+    var i = 0
+    val len = that.dimension.length
+    val lenlow = low.dimension.length
+    val lenhigh = high.dimension.length
+    val limit = Math.min(len, Math.max(lenlow, lenhigh))
+    while (i < limit) {
+      val v = that.dimension(i)
+      if (!isNaN(v)) {
+        if (i < lenlow) {
+          val l = low.dimension(i)
+          if ((!isNaN(l)) && (v < l)) { result += (v - l) * (v - l) }
         }
-      },
-      (p,l,m) => { if (m < l) { result += (l-m) * (l-m) } },
-      (p,l,h) => {                                        },
-      (p,m,h) => { if (m > h) { result += (m-h) * (m-h) } },
-      (p,l)   => {                                        },
-      (p,m)   => {                                        },
-      (p,h)   => {                                        },
-      (p)     => {                                        }
-    )
+        if (i < lenhigh) {
+          val h = high.dimension(i)
+          if ((!isNaN(h)) && (v > h)) { result += (v - h) * (v - h) }
+        }
+      }
+      i += 1
+    }
     result
   }
 
@@ -67,54 +70,61 @@ case class RRectangle(
    * Add another area, return a rectangle containing both areas
    */
   def +(that: RRectangle) : RRectangle = {
-    if (this contains that) {
-      this
-    } else {
-      new RRectangle(
-        this.low .min(that.low),
-        this.high.max(that.high)
-      )
+    val l = this.low .min(that.low )
+    val h = this.high.max(that.high)
+    if ((l eq that.low) && (h eq that.high)) {
+      return that
     }
+    if ((l eq low) && (h eq high)) {
+      return this
+    }
+    new RRectangle(l, h)
   }
 
   /**
    * Add another vector, return a rectangle containing the new vector
    */
   def +(that: KVector) : RRectangle = {
-    if (this contains that) {
-      this
-    } else {
-      new RRectangle(
-        this.low .min(that),
-        this.high.max(that)
-      )
+    val l = this.low .min(that)
+    val h = this.high.max(that)
+    if ((l eq low) && (h eq high)) {
+      return this
     }
+    new RRectangle(l, h)
   }
 
   /**
    * Compute the intersection with another area
    */
-  def intersection(that: RRectangle) = {
+  def intersection(that: RRectangle) : RRectangle = {
     val maxlow  = this.low .max(that.low,  false)
     val minhigh = this.high.min(that.high, false)
+    if ((this.low eq maxlow) && (this.high eq minhigh)) { return this }
+    if ((that.low eq maxlow) && (that.high eq minhigh)) { return that }
     val len =
-      Math.max(
-        Math.max(this.low .dimension.length, that.low .dimension.length),
-        Math.max(this.high.dimension.length, that.high.dimension.length)
+      Math.min(
+        maxlow.dimension.length,
+        minhigh.dimension.length
       )
     val low  = new Array[Double](len)
     val high = new Array[Double](len)
-    maxlow.apply (
-      minhigh,
-      (p,l,h) => { if (l <= h)
-                   { low(p)  = l          ; high(p) = h          }
-              else { low(p)  = Double.NaN ; high(p) = Double.NaN } },
-      (p,l)   =>   { low(p)  = Double.NaN ; high(p) = Double.NaN },
-      (p,h)   =>   { low(p)  = Double.NaN ; high(p) = Double.NaN },
-      (p)     =>   { low(p)  = Double.NaN ; high(p) = Double.NaN }
-    )
+    var i = 0;
+    while (i < len) {
+      val l = maxlow.dimension(i)
+      val h = minhigh.dimension(i)
+      if (!isNaN(l) && !isNaN(h) && l <= h) {
+        low(i)  = l
+        high(i) = h
+      } else {
+        low(i)  = Double.NaN
+        high(i) = Double.NaN
+      }
+      i += 1
+    }
     new RRectangle(new KVector(low), new KVector(high))
   }
+
+  var _area1p : Double = Double.NaN
 
   /**
    * Compute the area of this rectangle such that
@@ -125,15 +135,23 @@ case class RRectangle(
    * </ul>
    */
   def area1p : Double = {
-    var result = 1d
-    low.apply(
-      high,
-      (p,l,h) => { result = result * (h - l + 1d) },
-      (p,l)   => {                                },
-      (p,h)   => {                                },
-      (p)     => {                                }
-    )
-    result - 1d
+    if (isNaN(_area1p)) {
+      _area1p = 1d
+      var i = 0
+      val lowlen = low.dimension.length
+      val highlen = high.dimension.length
+      val limit = Math.min(lowlen, highlen)
+      while (i < limit) {
+        val l = low.dimension(i)
+        val h = high.dimension(i)
+        if ((!isNaN(l)) && (!isNaN(h))) {
+          _area1p *= (h - l + 1d)
+        }
+        i += 1
+      }
+      _area1p -= 1d
+    }
+    _area1p
   }
 
   override def toString() : String = {
@@ -155,9 +173,14 @@ case class RRectangle(
       return false
     } else {
       val that = obj.asInstanceOf[RRectangle]
-      that.low.equals(this.low) && that.high.equals(this.high)
+      if (this eq that) {
+        true
+      } else {
+        that.low.equals(this.low) && that.high.equals(this.high)
+      }
     }
   }
+
   override def hashCode() : int = {
     low.hashCode * 31 + high.hashCode
   }
