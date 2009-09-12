@@ -130,13 +130,13 @@ case class RTreeNode[T](width: Int)
   def split() : Unit = {
     val nodes =
       if (isLeafLevel) {
-        var c = new Array[RTreeLeaf[T]](childs)
-        System.arraycopy(child, 0, c, 0, childs)
-        AreaOverlapPartitioner.split[T](c)
+        var leafs = new Array[RTreeLeaf[T]](childs)
+        System.arraycopy(child, 0, leafs, 0, childs)
+        AreaOverlapPartitioner.split[T](leafs)
       } else {
-        var c = new Array[RTreeNode[T]](childs)
-        System.arraycopy(child, 0, c, 0, childs)
-        AreaOverlapPartitioner.split[T](c)
+        var nodes = new Array[RTreeNode[T]](childs)
+        System.arraycopy(child, 0, nodes, 0, childs)
+        AreaOverlapPartitioner.split[T](nodes)
       }
     if (isRoot) {
       splitRoot(nodes._1, nodes._2)
