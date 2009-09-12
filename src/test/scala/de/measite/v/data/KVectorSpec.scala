@@ -128,6 +128,10 @@ object KVectorSpec extends Specification {
       vec123a.min(vec321a) must_== vec121a
       vec321a.min(vec123a) must_== vec121a
     }
+    "same instance check" in {
+      (vec121a.min(vec123a) eq vec121a) must_== true
+      (vec123a.min(vec121a) eq vec121a) must_== true
+    }
     "sparse min" in {
       vec1N3a.min(vec321a) must_== vec121a
       vec321a.min(vec1N3a) must_== vec121a
