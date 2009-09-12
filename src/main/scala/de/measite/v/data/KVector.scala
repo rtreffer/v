@@ -141,15 +141,30 @@ case class KVector(dimension: Array[Double])
    * combined elements.
    */
   def +(that: KVector) : KVector = {
-    val len = Math.max(dimension.length, that.dimension.length)
-    val result = new Array[Double](len)
-    apply(
-      that,
-      (p,u,v) => { result(p) = u + v      },
-      (p,u)   => { result(p) = u          },
-      (p,v)   => { result(p) = v          },
-      (p)     => { result(p) = Double.NaN }
+    val thislen = this.dimension.length
+    val thatlen = that.dimension.length
+    val len = Math.min(thislen, thatlen)
+    val result = new Array[Double](Math.max(thislen, thatlen))
+    val r = if (thislen < thatlen) { this.dimension } else { that.dimension }
+    System.arraycopy(
+      if (thislen >= thatlen) { this.dimension } else { that.dimension },
+      0,
+      result,
+      0,
+      result.length
     )
+    var i = 0
+    while (i < len) {
+      val v = r(i)
+      if (!isNaN(v)) {
+        if (isNaN(result(i))) {
+          result(i)  = v
+        } else {
+          result(i) += v
+        }
+      }
+      i += 1
+    }
     new KVector(result)
   }
 
@@ -177,71 +192,52 @@ case class KVector(dimension: Array[Double])
     v
   }
 
-  def min(that: KVector, merge: boolean) : KVector = {
+  private def merge(that: KVector, merge: boolean, max: boolean) : KVector = {
+    var isL     = true
+    var isR     = true
     val thislen = this.dimension.length
     val thatlen = that.dimension.length
-    val result = new Array[Double](Math.max(thislen, thatlen))
+    val len     = Math.max(thislen, thatlen)
+    val result  = new Array[Double](len)
     var i = 0
-    val l = if (thislen >= thatlen) { dimension } else { that.dimension }
-    val r = if (l ne dimension)     { dimension } else { that.dimension }
-    System.arraycopy(l, 0, result, 0, result.length)
-    while (i < r.length) {
-      val v = r(i)
-      if (isNaN(v)) {
-        if (!merge) { result(i) = Double.NaN }
-      } else {
-        val u = result(i)
-        if (isNaN(u)) {
-          if (merge) { result(i) = v }
+    while (i < len) {
+      val l = if (i < thislen) { this.dimension(i) } else { Double.NaN }
+      val r = if (i < thatlen) { that.dimension(i) } else { Double.NaN }
+      if (isNaN(l)) {
+        if (merge) {
+          result(i)  = r
+          if (!isNaN(r)) { isL = false }
         } else {
-          if ( v < u ) { result(i) = v }
+          result(i)  = Double.NaN
+          if (!isNaN(r)) { isR = false }
+        }
+      } else {
+        if (isNaN(r)) {
+          if (merge) {
+            result(i) = l
+            isR = false
+          } else {
+            result(i) = Double.NaN
+            isL = false
+          }
+        } else {
+          val v = if (max) { Math.max(l, r ) } else { Math.min(l, r) }
+          if ( v != l ) { isL = false }
+          if ( v != r ) { isR = false }
+          result(i) = v
         }
       }
       i += 1
     }
-    if (!merge) {
-      while (i < result.length) {
-        result(i) = Double.NaN
-        i += 1
-      }
-    }
+    if (isL) { return this }
+    if (isR) { return that }
     new KVector(result)
   }
 
-  def min(that: KVector) : KVector = min(that, true)
-
-  def max(that: KVector, merge: boolean) : KVector = {
-    val thislen = this.dimension.length
-    val thatlen = that.dimension.length
-    val result = new Array[Double](Math.max(thislen, thatlen))
-    var i = 0
-    val l = if (thislen >= thatlen) { dimension } else { that.dimension }
-    val r = if (l ne dimension)     { dimension } else { that.dimension }
-    System.arraycopy(l, 0, result, 0, result.length)
-    while (i < r.length) {
-      val v = r(i)
-      if (isNaN(v)) {
-        if (!merge) { result(i) = Double.NaN }
-      } else {
-        val u = result(i)
-        if (isNaN(u)) {
-          if (merge) { result(i) = v }
-        } else {
-          if ( v > u ) { result(i) = v }
-        }
-      }
-      i += 1
-    }
-    if (!merge) {
-      while (i < result.length) {
-        result(i) = Double.NaN
-        i += 1
-      }
-    }
-    new KVector(result)
-  }
-
-  def max(that: KVector) : KVector = max(that, true)
+  def min(that: KVector, m: boolean) : KVector = merge(that,     m, false)
+  def min(that: KVector)             : KVector = merge(that,  true, false)
+  def max(that: KVector, m: boolean) : KVector = merge(that,     m,  true)
+  def max(that: KVector)             : KVector = merge(that,  true,  true)
 
   /**
    * Compare this vector with a second vector.
@@ -345,6 +341,9 @@ case class KVector(dimension: Array[Double])
       return false
     } else {
       val that = obj.asInstanceOf[KVector]
+      if (this eq that) {
+        return true
+      }
       var result = true
       apply(
         that,
