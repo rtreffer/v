@@ -1,6 +1,7 @@
 package de.measite.v.tree
 
 import java.lang.UnsupportedOperationException
+import java.lang.Math.signum
 import java.util.Comparator
 import java.util.TreeSet
 
@@ -17,11 +18,11 @@ class NearestLeafIterator[T](
         if (node) {
           element.asInstanceOf[RTreeNode[T]].rectangle.distance(position)
         } else {
-          element.asInstanceOf[RTreeLeaf[T]].position - position
+          element.asInstanceOf[RTreeLeaf[T]].position.distance(position)
         }
       override def compareTo(that : Entry) : int = {
         if (this.score != that.score) {
-          return Math.signum(this.score - that.score).asInstanceOf[int]
+          return signum(this.score - that.score).asInstanceOf[int]
         }
         if (!node) {
           if (!that.node) {
@@ -35,9 +36,9 @@ class NearestLeafIterator[T](
           if (!that.node) {
              1
           } else {
-            element.asInstanceOf[RTreeNode[T]].rectangle.compareTo(
-              that.element.asInstanceOf[RTreeNode[T]].rectangle
-            )
+            val l = this.element.asInstanceOf[RTreeNode[T]]
+            val r = that.element.asInstanceOf[RTreeNode[T]]
+            l.compareTo(r)
           }
         }
       }
@@ -86,14 +87,12 @@ class NearestLeafIterator[T](
         i += 1
         val expand = border.pollFirst
         if ( !expand.node ) {
-          System.out.println("Expands: " + i + "/" + border.size);
           return expand.element.asInstanceOf[RTreeLeaf[T]]
         } else {
           val node = expand.element.asInstanceOf[RTreeNode[T]]
-          node.child.foreach(
-            c => { if (c ne null) {
-              border.add( new Entry(c) )
-            }}
+          node.foreach(
+            (p, c) => { border.add(new Entry(c)) },
+            (p, c) => { border.add(new Entry(c)) }
           )
         }
       }
