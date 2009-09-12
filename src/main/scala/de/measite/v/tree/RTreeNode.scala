@@ -96,10 +96,9 @@ case class RTreeNode[T](width: Int)
    * Recursively update the bounding box.
    */
   private def chainBounds(position: KVector) {
-    if (rectangle contains position) {
-      return
-    }
-    rectangle = rectangle + position
+    val rect = rectangle + position
+    if (rect eq rectangle) { return }
+    rectangle = rect
     if (isRoot) {
       return
     }
@@ -113,10 +112,9 @@ case class RTreeNode[T](width: Int)
    * Recursively update the bounding box.
    */
   private def chainBounds(position: RRectangle) {
-    if (rectangle contains position) {
-      return
-    }
-    rectangle += position
+    val rect = rectangle + position
+    if (rect eq rectangle) { return }
+    rectangle = rect
     if (isRoot) {
       return
     }
