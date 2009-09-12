@@ -21,18 +21,6 @@ object AreaOverlapPartitioner extends Partitioner {
    */
 
   def split[T](nodes : Array[RTreeLeaf[T]]) : (RTreeNode[T], RTreeNode[T]) = {
-    var vector = new KVector(new Array[Double](0))
-    nodes.foreach(node => {
-      vector += node.position
-    })
-    vector.*!(1d/nodes.length)
-    java.util.Arrays.sort(nodes, new Comparator[RTreeLeaf[T]]() {
-      def compare(l : RTreeLeaf[T], r: RTreeLeaf[T]) : int = {
-        val dl = l.position - vector
-        val dr = r.position - vector
-        Math.signum(dl - dr).asInstanceOf[int]
-      }
-    })
     val positions = nodes.map(node => node.position)
     var state = new PartitioningKVectorState(positions)
     var istate = state.next()(0)
@@ -54,26 +42,6 @@ object AreaOverlapPartitioner extends Partitioner {
   }
 
   def split[T](nodes : Array[RTreeNode[T]]) : (RTreeNode[T], RTreeNode[T]) = {
-    var vector = new KVector(new Array[Double](0))
-    nodes.foreach(node => {
-      vector += node.rectangle.low + node.rectangle.high
-    })
-    vector.*!(0.5d/nodes.length)
-    java.util.Arrays.sort(nodes, new Comparator[RTreeNode[T]]() {
-      def compare(l : RTreeNode[T], r: RTreeNode[T]) : int = {
-        var dl1 = l.rectangle.low  - vector
-        var dl2 = l.rectangle.high - vector
-        if (dl2 < dl1) { val t = dl1; dl1 = dl2; dl2 = t }
-        var dr1 = r.rectangle.low  - vector
-        var dr2 = r.rectangle.high - vector
-        if (dr2 < dr1) { val t = dr1; dr1 = dr2; dr2 = t }
-        if (dl1 == dr1) {
-          dl1 = -dl2
-          dr1 = -dr2
-        }
-        Math.signum(dl1 - dr1).asInstanceOf[int]
-      }
-    })
     val rects = nodes.map(node => node.rectangle)
     var state = new PartitioningRRectangleState(rects)
     var istate = state.next()(0)
