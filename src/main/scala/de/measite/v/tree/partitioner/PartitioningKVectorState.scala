@@ -11,6 +11,9 @@ class PartitioningKVectorState(val position : Array[KVector])
 
   private var left  : RRectangle = new RRectangle
   private var right : RRectangle = new RRectangle
+  private var la    : Double     = 0d
+  private var ra    : Double     = 0d
+  private var score = 1d
   private var pos = 0
   private var intersection = 0d
   private var leftSet = 0
@@ -32,13 +35,17 @@ class PartitioningKVectorState(val position : Array[KVector])
       case -1 => { // left
         state(pos) = set
         left  = that.left + position(pos)
+        la    = if (left eq that.left) { that.la } else { left.area1p }
         right = that.right
+        ra    = that.ra
         leftSet += 1
       }
       case  1 => { // right
         state(pos) = set
         left  = that.left
+        la    = that.la
         right = that.right + position(pos)
+        ra    = if (right eq that.right) { that.ra } else { right.area1p }
         rightSet += 1
       }
       case  _ => { // illegal
@@ -46,7 +53,7 @@ class PartitioningKVectorState(val position : Array[KVector])
       }
     }
 
-    intersection = left.intersection(right).area1p
+    score = la + ra
   }
 
   def next() : Array[State] = {
@@ -86,10 +93,10 @@ class PartitioningKVectorState(val position : Array[KVector])
   }
 
   override def compareTo(that: PartitioningKVectorState) : int = {
-    if (intersection < that.intersection) {
+    if (score < that.score) {
       -1
     } else
-    if (intersection > that.intersection) {
+    if (score > that.score) {
        1
     } else
     if (pos != that.pos) {
