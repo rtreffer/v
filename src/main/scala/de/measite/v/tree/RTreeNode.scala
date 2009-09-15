@@ -2,12 +2,12 @@ package de.measite.v.tree
 
 import de.measite.v.data.RRectangle
 import de.measite.v.data.KVector
-import de.measite.v.tree.partitioner.AreaOverlapPartitioner
+import de.measite.v.tree.partitioner.Partitioner
 
 /**
  * A tree node, the most intelligent class within the tree.
  */
-case class RTreeNode[T](width: Int)
+case class RTreeNode[T](width: Int, partitioner: Partitioner)
   extends  RTreeParent
   with     RTreeElement {
 
@@ -132,11 +132,11 @@ case class RTreeNode[T](width: Int)
       if (isLeafLevel) {
         var leafs = new Array[RTreeLeaf[T]](childs)
         System.arraycopy(child, 0, leafs, 0, childs)
-        AreaOverlapPartitioner.split[T](leafs)
+        partitioner.split[T](leafs)
       } else {
         var nodes = new Array[RTreeNode[T]](childs)
         System.arraycopy(child, 0, nodes, 0, childs)
-        AreaOverlapPartitioner.split[T](nodes)
+        partitioner.split[T](nodes)
       }
     if (isRoot) {
       splitRoot(nodes._1, nodes._2)

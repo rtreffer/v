@@ -5,16 +5,17 @@ import java.util.Iterator
 
 import de.measite.v.data.KVector
 import de.measite.v.data.RRectangle
+import de.measite.v.tree.partitioner.Partitioner
 
 /**
  * The RTree root class. Mainly intaracting on the root node.
  */
-case class RTree[T](width: Int) extends RTreeParent {
+case class RTree[T](width: Int, partitioner: Partitioner) extends RTreeParent {
 
   /**
    * The root node of this tree.
    */
-  val root = new RTreeNode[T](width)
+  val root = new RTreeNode[T](width, partitioner)
 
   {
     root.parent = this
