@@ -35,7 +35,7 @@ class PartitioningKVectorState(val position : Array[KVector])
       case -1 => { // left
         state(pos) = set
         left  = that.left + position(pos)
-        la    = if (left eq that.left) { that.la } else { left.area1p }
+        la    = if (left eq that.left) { that.la } else { left.area1p + 1d }
         right = that.right
         ra    = that.ra
         leftSet += 1
@@ -45,7 +45,7 @@ class PartitioningKVectorState(val position : Array[KVector])
         left  = that.left
         la    = that.la
         right = that.right + position(pos)
-        ra    = if (right eq that.right) { that.ra } else { right.area1p }
+        ra    = if (right eq that.right) { that.ra } else { right.area1p + 1d }
         rightSet += 1
       }
       case  _ => { // illegal

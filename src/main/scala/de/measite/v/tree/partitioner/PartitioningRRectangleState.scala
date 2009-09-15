@@ -32,7 +32,7 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
       case -1 => { // left
         state(pos) = set
         left  = that.left + rect(pos)
-        la    = if (left eq that.left) { that.la } else { left.area1p }
+        la    = if (left eq that.left) { that.la } else { left.area1p + 1d }
         right = that.right
         ra    = that.ra
         leftSet += 1
@@ -40,7 +40,7 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
       case  1 => { // right
         state(pos) = set
         right = that.right + rect(pos)
-        ra    = if (right eq that.right) { that.ra } else { right.area1p }
+        ra    = if (right eq that.right) { that.ra } else { right.area1p + 1d }
         left  = that.left
         la    = that.la
         rightSet += 1
