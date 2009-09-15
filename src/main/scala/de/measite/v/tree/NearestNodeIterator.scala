@@ -7,19 +7,21 @@ import de.measite.v.data.KVector
 
 case class NearestNodeIterator[T](position: KVector, root: RTreeNode[T]) {
 
-  case class Entry(element: RTreeNode[T]) extends Comparable[Entry] {
+  case class Entry(element: RTreeNode[T], level : int) extends Comparable[Entry] {
     val score : double = element.rectangle.distance(position)
     val area  : double = element.rectangle.area1p
 
     override def compareTo(that : Entry) : int = {
       if (this.score != that.score) {
         signum(this.score - that.score).asInstanceOf[int]
+      } else
+      if (this.level != that.level) {
+        signum(that.level - this.level).asInstanceOf[int]
+      } else
+      if (this.area != that.area) {
+        signum(that.area - this.area).asInstanceOf[int]
       } else {
-        if (this.area != that.area) {
-          signum(that.area - this.area).asInstanceOf[int]
-        } else {
-          this.element.rectangle.compareTo(that.element.rectangle)
-        }
+        this.element.rectangle.compareTo(that.element.rectangle)
       }
     }
   }
@@ -28,20 +30,21 @@ case class NearestNodeIterator[T](position: KVector, root: RTreeNode[T]) {
   val border = new TreeSet[Entry]()
 
   {
-    border.add( new Entry(root) )
+    border.add( new Entry(root, 0) )
   }
 
   def next() : RTreeNode[T] = {
     while (border.size > 0) {
-      val element = border.pollFirst.element
-      if (element.isLeafLevel) {
-        return element
+      val b = border.pollFirst
+      if (b.element.isLeafLevel) {
+        return b.element
       } else {
         var i = 0
-        while (i < element.childs) {
+        while (i < b.element.childs) {
           border.add(
             new Entry(
-              element.child(i).asInstanceOf[RTreeNode[T]]
+              b.element.child(i).asInstanceOf[RTreeNode[T]],
+              b.level + 1
             )
           )
           i += 1
