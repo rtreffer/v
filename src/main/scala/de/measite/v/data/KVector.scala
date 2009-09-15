@@ -1,6 +1,7 @@
 package de.measite.v.data
 
 import java.lang.Double.isNaN
+import java.lang.Math
 
 /**
  * A KVector is a dense k-dimensional vector.
