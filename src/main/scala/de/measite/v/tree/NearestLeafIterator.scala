@@ -38,7 +38,13 @@ class NearestLeafIterator[T](
           } else {
             val l = this.element.asInstanceOf[RTreeNode[T]]
             val r = that.element.asInstanceOf[RTreeNode[T]]
-            l.rectangle.compareTo(r.rectangle)
+            val d = l.rectangle.diagonal.length2 - r.rectangle.diagonal.length2
+            if (d == 0d) {
+              l.rectangle.compareTo(r.rectangle)
+            } else {
+              if (d < 0d) { -1 } else
+                          {  1 }
+            }
           }
         }
       }

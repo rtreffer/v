@@ -12,14 +12,21 @@ import java.lang.Math
  * This class is collections safe. It implements a partial ordering
  * as well as comparable, equals and hashcode.
  */
-case class KVector(dimension: Array[Double])
+class KVector(dim: Array[Double])
   extends Comparable[KVector] {
 
-    /**
-     * Helper function to apply a function to every element, handling NaN
-     * as "not set".
-     */
-    // TODO: ugly code
+  val dimension = dim
+
+  // implicit boxing of arrays
+  implicit def array2vector(array : Array[Double]) = {
+    new KVector(array)
+  }
+
+  /**
+   * Helper function to apply a function to every element, handling NaN
+   * as "not set".
+   */
+  // TODO: ugly code
   def apply(
     set   : (Int, Double) => Unit,
     unset : (Int) => Unit
@@ -123,18 +130,26 @@ case class KVector(dimension: Array[Double])
    * Apply a constant factor to every component of this vector.
    */
   def *!(d : Double) : Unit = {
-    for (i <- 0 until dimension.length) {
-      if (!isNaN(dimension(i))) {
-        dimension(i) *= d
-      }
+    val l = dimension.length
+    var i = 0
+    while (i < l) {
+      dimension(i) *= d
+      i += 1
     }
   }
 
   /**
    * Apply a constant factor to every component of this vector.
    */
-  def *(d : Double) : Unit = {
-    new KVector(dimension.map(x => {d*x}))
+  def *(d : Double) : KVector = {
+    val l = dimension.length
+    val array = new Array[Double](l)
+    var i=0
+    while (i < l) {
+      array(i) = dimension(i) * d
+      i += 1
+    }
+    array
   }
 
   /**
@@ -169,6 +184,45 @@ case class KVector(dimension: Array[Double])
     new KVector(result)
   }
 
+  def to(that : KVector) : KVector = {
+    val thislen = this.dimension.length
+    val thatlen = that.dimension.length
+    val len = Math.min(thislen, thatlen)
+    val result = new Array[Double](len)
+    var i = 0
+    while (i < len) {
+      val l = this.dimension(i)
+      val r = that.dimension(i)
+      result(i) = if (isNaN(l) || isNaN(r)) {
+          Double.NaN
+        } else {
+          r - l
+        }
+      i += 1
+    }
+    new KVector(result)
+  }
+
+  private var _length2 : Double = Double.NaN
+
+  /**
+   * Squared length of this vector.
+   */
+  def length2 : double = {
+    if (isNaN(_length2)) {
+      _length2 = 0d
+      var i = 0
+      while (i < dimension.length) {
+        val v = dimension(i)
+        if (!isNaN(v)) {
+          _length2 += v*v
+        }
+        i += 1
+      }
+    }
+    _length2
+  }
+
   /**
    * Difference as metric distance.
    */
@@ -194,20 +248,24 @@ case class KVector(dimension: Array[Double])
   }
 
   private def merge(that: KVector, merge: boolean, max: boolean) : KVector = {
-    var isL     = true
-    var isR     = true
     val thislen = this.dimension.length
     val thatlen = that.dimension.length
-    val len     = Math.max(thislen, thatlen)
-    val result  = new Array[Double](len)
+    if (thatlen > thislen) { return that.merge(this, merge, max) }
+
+    var isL     = true
+    var isR     = true
+    val result  = new Array[Double](thislen)
+    System.arraycopy(this.dimension, 0, result, 0, thislen)
     var i = 0
-    while (i < len) {
-      val l = if (i < thislen) { this.dimension(i) } else { Double.NaN }
+    while (i < thislen) {
+      val l = this.dimension(i)
       val r = if (i < thatlen) { that.dimension(i) } else { Double.NaN }
       if (isNaN(l)) {
         if (merge) {
-          result(i)  = r
-          if (!isNaN(r)) { isL = false }
+          if (!isNaN(r)) {
+            result(i) = r
+            isL = false
+          }
         } else {
           result(i)  = Double.NaN
           if (!isNaN(r)) { isR = false }
@@ -215,7 +273,6 @@ case class KVector(dimension: Array[Double])
       } else {
         if (isNaN(r)) {
           if (merge) {
-            result(i) = l
             isR = false
           } else {
             result(i) = Double.NaN
@@ -223,9 +280,11 @@ case class KVector(dimension: Array[Double])
           }
         } else {
           val v = if (max) { Math.max(l, r ) } else { Math.min(l, r) }
-          if ( v != l ) { isL = false }
+          if ( v != l ) { 
+            isL = false
+            result(i) = v
+          }
           if ( v != r ) { isR = false }
-          result(i) = v
         }
       }
       i += 1
@@ -308,6 +367,8 @@ case class KVector(dimension: Array[Double])
     compare >= 0
   }
 
+  // TODO slow code
+
   /**
    * Transform this vector into a string representation.
    * Implicitly called by "" + kvector.
@@ -334,6 +395,8 @@ case class KVector(dimension: Array[Double])
     sb.toString()
   }
 
+  // TODO slow code
+
   /**
    * Two vectors are equal if the set dimension on both vectors match.
    */
@@ -356,6 +419,8 @@ case class KVector(dimension: Array[Double])
       result
     }
   }
+
+  // TODO slow code
 
   /**
    * The hashCode of a KVector is defined by the position and value of all

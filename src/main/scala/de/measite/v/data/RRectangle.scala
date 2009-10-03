@@ -8,10 +8,13 @@ import java.lang.Double.isNaN
  * This class is collections safe. It implements equals, compareTo and
  * hashCode
  */
-case class RRectangle(
-  val low: KVector,
-  val high: KVector
+class RRectangle(
+  val vlow: KVector,
+  val vhigh: KVector
 ) extends Comparable[RRectangle] {
+
+  val low  = vlow
+  val high = vhigh
 
   /**
    * Create a new zero-dimensional rectangle.
@@ -52,13 +55,23 @@ case class RRectangle(
     while (i < limit) {
       val v = that.dimension(i)
       if (!isNaN(v)) {
+        val smaller =
         if (i < lenlow) {
           val l = low.dimension(i)
-          if ((!isNaN(l)) && (v < l)) { result += (v - l) * (v - l) }
-        }
-        if (i < lenhigh) {
+          if ((!isNaN(l)) && (v < l)) {
+            val d = v - l
+            result += d*d
+            true
+          } else {
+            false
+          }
+        } else { false }
+        if ((!smaller) && i < lenhigh) {
           val h = high.dimension(i)
-          if ((!isNaN(h)) && (v > h)) { result += (v - h) * (v - h) }
+          if ((!isNaN(h)) && (v > h)) {
+            val d = v - h
+            result += d*d
+          }
         }
       }
       i += 1
@@ -124,7 +137,49 @@ case class RRectangle(
     new RRectangle(new KVector(low), new KVector(high))
   }
 
+  def union(that : RRectangle) : Array[RRectangle] = {
+    // TODO
+    var lcr = true
+    var rcl = true
+    val thislen = this.low.dimension.length
+    val thatlen = that.low.dimension.length
+    val len = Math.max(thislen, thatlen)
+    var i = 0
+    while (i < len && (lcr || rcl)) {
+      val l1 = if (i < thislen) { this. low.dimension(i) } else { Double.NaN }
+      val h1 = if (i < thislen) { this.high.dimension(i) } else { Double.NaN }
+      val l2 = if (i < thatlen) { that. low.dimension(i) } else { Double.NaN }
+      val h2 = if (i < thatlen) { that.high.dimension(i) } else { Double.NaN }
+      if ( l1 < l2 ) {
+      
+      } else
+      if ( l1 > l2 ) {
+
+      }
+    }
+    null
+  }
+
+  var _diagonal : KVector = null
+
+  def diagonal : KVector = {
+    if (_diagonal == null) {
+      _diagonal = low.to(high)
+    }
+    _diagonal
+  }
+
+  var _center : KVector = null
+
+  def center : KVector = {
+    if (_center == null) { 
+      _center = low avg high
+    }
+    _center
+  }
+
   var _area1p : Double = Double.NaN
+  var _area   : Double = Double.NaN
 
   /**
    * Compute the area of this rectangle such that
@@ -152,6 +207,29 @@ case class RRectangle(
       _area1p -= 1d
     }
     _area1p
+  }
+
+  def area : Double = {
+    if (isNaN(_area)) {
+      val lowlen  =  low.dimension.length
+      val highlen = high.dimension.length
+      val limit = Math.min(lowlen, highlen)
+      var i = 0
+      while (i < limit) {
+        val l =  low.dimension(i)
+        val r = high.dimension(i)
+        val d = (r - l) * (r - l)
+        if (d > 0) {
+          if (isNaN(_area)) {
+            _area  = d
+          } else {
+            _area *= d
+          }
+        }
+        i += 1
+      }
+    }
+    _area
   }
 
   override def toString() : String = {

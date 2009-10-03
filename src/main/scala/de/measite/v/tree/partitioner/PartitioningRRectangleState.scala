@@ -50,7 +50,7 @@ class PartitioningRRectangleState(val rect : Array[RRectangle])
       }
     }
 
-    areaScore = la + ra
+    areaScore = left.diagonal.length2 + right.diagonal.length2
 
   }
 

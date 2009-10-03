@@ -9,7 +9,7 @@ case class NearestNodeIterator[T](position: KVector, root: RTreeNode[T]) {
 
   case class Entry(element: RTreeNode[T], level : int) extends Comparable[Entry] {
     val score : double = element.rectangle.distance(position)
-    val area  : double = element.rectangle.area1p
+    val area  : double = element.rectangle.diagonal.length2
 
     override def compareTo(that : Entry) : int = {
       if (this.score != that.score) {

@@ -53,7 +53,7 @@ class PartitioningKVectorState(val position : Array[KVector])
       }
     }
 
-    score = la + ra
+    score = left.diagonal.length2 + right.diagonal.length2
   }
 
   def next() : Array[State] = {
