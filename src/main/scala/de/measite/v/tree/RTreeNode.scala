@@ -166,60 +166,6 @@ class RTreeNode[T](
     }
   }
 
-  def optimize(deep : boolean) : Unit = {
-    if (childs == 0) { return }
-    if (!isLeafLevel) {
-      foreachNode( (p, node) => { node.optimize } )
-    } else {
-      return
-    }
-    // optmize
-    var subchilds = 0
-    foreachNode(
-      (p, node) => { subchilds += node.childs }
-    )
-    val means = Math.max(
-      childs,
-      Math.min(( 2 * subchilds ) / width, width - 1)
-    )
-    val replacement =
-    if (childs > 0 && child(0).asInstanceOf[RTreeNode[T]].isLeafLevel) {
-      // TODO
-      val leafList = new ArrayList[RTreeLeaf[T]](maxChilds * maxChilds)
-      foreachNode(
-        (p, node) => {
-          node.foreachLeaf(
-            (p, l) => { leafList.add(l) },
-          )
-        }
-      )
-      val leafArray = new Array[RTreeLeaf[T]](leafList.size())
-      leafList.toArray(leafArray)
-      KMeansPartitioner.split[T](leafArray, means, width)
-    } else {
-      // TODO
-      val nodeList = new ArrayList[RTreeNode[T]](maxChilds * maxChilds)
-      foreachNode(
-        (p, node) => {
-          node.foreachNode(
-            (p, n) => { nodeList.add(n) }
-          )
-        }
-      )
-      val nodeArray = new Array[RTreeNode[T]](nodeList.size())
-      nodeList.toArray(nodeArray)
-      KMeansPartitioner.split[T](nodeArray, means, width)
-    }
-    childs = replacement.childs
-    System.arraycopy(replacement.child, 0, child, 0, childs)
-    foreach(
-      (p, leaf) => { leaf.parent = this },
-      (p, node) => { node.parent = this }
-    )
-  }
-
-  def optimize() : Unit = optimize(true)
-
   /**
    * Split logic, in case this node overflows.
    */

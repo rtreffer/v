@@ -110,10 +110,6 @@ class RTree[T](
     )
   }
 
-  def optimize() : Unit = {
-    root.optimize()
-  }
-
   /**
    * Return a string representation of this object instance.
    */
