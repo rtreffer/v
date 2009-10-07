@@ -5,26 +5,16 @@ import java.util.ArrayList
 import de.measite.v.data.RRectangle
 import de.measite.v.data.KVector
 import de.measite.v.tree.partitioner.Partitioner
-import de.measite.v.tree.partitioner.KMeansPartitioner
 
 /**
  * A tree node, the most intelligent class within the tree.
  */
 class RTreeNode[T](
-  vwidth: Int,
-  vpartitioner: Partitioner
+  __tree  : RTree[T]
 ) extends  RTreeParent
-  with     RTreeElement {
+  with     RTreeElement[T] {
 
-  /**
-   * The partitioner of this node.
-   */
-  val partitioner = vpartitioner
-
-  /**
-   * The normal width of this tree element.
-   */
-  val width = vwidth
+  tree = __tree
 
   /**
    * The bounding box of this subtree.
@@ -38,9 +28,9 @@ class RTreeNode[T](
   /**
    * The child array
    */
-  var child = new Array[RTreeElement](width + 1)
+  var child = new Array[RTreeElement[T]](__tree.width + 1)
 
-  var maxChilds = width
+  var maxChilds = __tree.width
 
   /**
    * A simple foreach facility. This method hides the leaflevel complexity.
@@ -86,7 +76,7 @@ class RTreeNode[T](
    * Add a now leaf node at this level.
    */
   def +(position: KVector) : RTreeLeaf[T] = {
-    val result = new RTreeLeaf[T](position)
+    val result = new RTreeLeaf[T](position, tree)
     this + result
     result
   }
@@ -94,7 +84,7 @@ class RTreeNode[T](
   /**
    * Add a child element at this level.
    */
-  def +(c: RTreeElement) : Unit = {
+  def +(c: RTreeElement[T]) : Unit = {
     child(childs) = c
     c.parent = this
     childs += 1
@@ -174,11 +164,11 @@ class RTreeNode[T](
       if (isLeafLevel) {
         var leafs = new Array[RTreeLeaf[T]](childs)
         System.arraycopy(child, 0, leafs, 0, childs)
-        partitioner.split[T](leafs)
+        tree.partitioner.split[T](leafs, this, 0d)
       } else {
         var node = new Array[RTreeNode[T]](childs)
         System.arraycopy(child, 0, node, 0, childs)
-        partitioner.split[T](node)
+        tree.partitioner.split[T](node, this, 0d)
       }
     if (isRoot) {
       splitRoot(nodes._1, nodes._2)
@@ -188,20 +178,22 @@ class RTreeNode[T](
   }
 
   def grow(
-    vwidth: Int
+    _width: Int
   ) : Unit = {
-    val vchild = new Array[RTreeElement](vwidth + 1)
-    System.arraycopy(child, 0, vchild, 0, child.length)
-    child = vchild
-    maxChilds = vwidth
+    val _child = new Array[RTreeElement[T]](_width + 1)
+    System.arraycopy(child, 0, _child, 0, child.length)
+    child = _child
+    maxChilds = _width
   }
 
   private def splitRoot(
     left  : RTreeNode[T],
     right : RTreeNode[T]
   ) : Unit = {
-    for (i <- 0 until childs) {
+    var i = 0
+    while (i < childs) {
       child(i) = null
+      i += 1
     }
     childs = 0
     this + left

@@ -5,7 +5,14 @@ import de.measite.v.data.KVector
 /**
  * A RTree data leaf.
  */
-case class RTreeLeaf[T](position: KVector) extends RTreeElement {
+class RTreeLeaf[T](
+  __position : KVector,
+  __tree     : RTree[T]
+) extends RTreeElement[T] {
+
+  tree = __tree
+
+  val position = __position
 
   /**
    * The data payload.
@@ -15,9 +22,9 @@ case class RTreeLeaf[T](position: KVector) extends RTreeElement {
   /**
    * Create a new data node with a custom payload.
    */
-  def this(position: KVector, d: T) {
-    this(position)
-    data = d
+  def this(position : KVector, _tree: RTree[T], _data : T) {
+    this(position, _tree)
+    data = _data
     this
   }
 

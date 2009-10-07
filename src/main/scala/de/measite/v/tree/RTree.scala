@@ -13,14 +13,18 @@ import de.measite.v.measure.SearchStatistic
  * The RTree root class. Mainly intaracting on the root node.
  */
 class RTree[T](
-  width: Int,
-  partitioner: Partitioner
+  __width       : Int,
+  __partitioner : Partitioner
 ) extends RTreeParent {
+
+  val width       = __width
+
+  val partitioner = __partitioner
 
   /**
    * The root node of this tree.
    */
-  val root = new RTreeNode[T](width, partitioner)
+  val root = new RTreeNode[T](this)
 
   {
     root.parent = this
@@ -73,7 +77,7 @@ class RTree[T](
     stats    : SearchStatistic
   ) : Iterator[RTreeLeaf[T]] = {
     if (stats ne null) { stats.start = System.currentTimeMillis }
-    new PriorityIterator[RTreeElement, RTreeLeaf[T]](
+    new PriorityIterator[RTreeElement[T], RTreeLeaf[T]](
       (element) => { // terminal
         if (element.isInstanceOf[RTreeLeaf[T]]) {
           element.asInstanceOf[RTreeLeaf[T]]
