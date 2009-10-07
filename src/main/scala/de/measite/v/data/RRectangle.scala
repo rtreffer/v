@@ -112,8 +112,19 @@ class RRectangle(
   def intersection(that: RRectangle) : RRectangle = {
     val maxlow  = this.low .max(that.low,  false)
     val minhigh = this.high.min(that.high, false)
+    // If intersection == this
     if ((this.low eq maxlow) && (this.high eq minhigh)) { return this }
+    // If intersection == that
     if ((that.low eq maxlow) && (that.high eq minhigh)) { return that }
+    // If intersection == that && this.low == that.low
+    if ((this.low eq maxlow) && (that.high eq minhigh)) {
+      if (this.low  == that.low ) { return that }
+    }
+    // It intersection == that && this.high == that.high
+    if ((that.low eq maxlow) && (this.high eq minhigh)) {
+      if (this.high == that.high) { return that }
+    }
+    // Unique intersection
     val len =
       Math.min(
         maxlow.dimension.length,
@@ -213,21 +224,26 @@ class RRectangle(
     if (isNaN(_area)) {
       val lowlen  =  low.dimension.length
       val highlen = high.dimension.length
-      val limit = Math.min(lowlen, highlen)
+      val limit   = Math.min(lowlen, highlen)
+      var first   = true
       var i = 0
       while (i < limit) {
         val l =  low.dimension(i)
         val r = high.dimension(i)
-        val d = (r - l) * (r - l)
-        if (d > 0) {
-          if (isNaN(_area)) {
-            _area  = d
-          } else {
-            _area *= d
+        if ((!isNaN(l)) && (!isNaN(r))) {
+          val d = (r - l) * (r - l)
+          if (d > 0d) {
+            if (first) {
+              _area  = d
+              first  = false
+            } else {
+              _area *= d
+            }
           }
         }
         i += 1
       }
+      if (first) { _area = 0d }
     }
     _area
   }
