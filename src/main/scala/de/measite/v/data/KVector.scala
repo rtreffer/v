@@ -409,13 +409,22 @@ class KVector(dim: Array[Double])
         return true
       }
       var result = true
-      apply(
-        that,
-        (p,l,r) => { result &= l == r },
-        (p,l)   => { result  = false  },
-        (p,r)   => { result  = false  },
-        (p)     => {                  }
-      )
+      val len = Math.max(this.dimension.length, that.dimension.length)
+      var i = 0
+      while (result && i < len) {
+        val l = if (i < this.dimension.length) {
+                  this.dimension(i)
+                } else {
+                  Double.NaN
+                }
+        val r = if (i < that.dimension.length) {
+                  that.dimension(i)
+                } else {
+                  Double.NaN
+                }
+        result &= (isNaN(l) && isNaN(r)) || (l == r)
+        i += 1
+      }
       result
     }
   }
