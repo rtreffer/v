@@ -28,7 +28,7 @@ object App extends Application {
   }
   // Step 2: build a tree
   System.out.println("(2) tree");
-  var tree = new RTree[String](20, QuadraticPartitioner)
+  var tree = new RTree[String](100, HotspotPartitioner)
   for (i <- 0 until vector.length) {
     tree + vector(i)
     if ((i + 1) % 1000 == 0) {

@@ -12,7 +12,7 @@ class NearestLeafIterator[T](
   root: RTreeNode[T]
 ) extends java.util.Iterator[RTreeLeaf[T]] {
 
-    case class Entry(element: RTreeElement) extends Comparable[Entry] {
+    case class Entry(element: RTreeElement[T]) extends Comparable[Entry] {
       val node  : boolean = element.isInstanceOf[RTreeNode[T]]
       val score : double  =
         if (node) {

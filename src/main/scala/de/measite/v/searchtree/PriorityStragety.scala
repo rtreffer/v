@@ -20,8 +20,23 @@ object PriorityStragety {
   def search(base : State) : State = {
     val tree = new TreeSet[State]()
     tree.add(base)
-    var result : State = null
+    search(tree)
+  }
 
+  def search(base : Array[State]) : State = {
+    val tree = new TreeSet[State]()
+    var i = 0
+    while(i < base.length) {
+      if (base(i) ne null) {
+        tree.add(base(i))
+      }
+      i += 1
+    }
+    search(tree)
+  }
+
+  def search(tree : TreeSet[State]) : State = {
+    var result : State = null
     while (tree.size() > 0 && result == null) {
       val state = tree.first();
       tree.remove(state);
@@ -34,7 +49,6 @@ object PriorityStragety {
         }
       }
     }
-
     result
   }
 
