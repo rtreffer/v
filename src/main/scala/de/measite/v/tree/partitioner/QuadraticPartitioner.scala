@@ -9,7 +9,11 @@ import de.measite.v.tree.{RTreeLeaf, RTreeNode}
 
 object QuadraticPartitioner extends Partitioner {
 
-  def split[T](nodes : Array[RTreeLeaf[T]]) : (RTreeNode[T], RTreeNode[T]) = {
+  def split[T](
+    nodes   : Array[RTreeLeaf[T]],
+    current : RTreeNode[T],
+    score   : Double
+  ) : (RTreeNode[T], RTreeNode[T]) = {
     val set = new BitSet(nodes.length)
     var maxArea  = new RRectangle(nodes(0).position, nodes(1).position).area1p
     var maxLeft  = 0
@@ -30,8 +34,8 @@ object QuadraticPartitioner extends Partitioner {
     }
     set.set(maxLeft )
     set.set(maxRight)
-    val lefts  = new RTreeNode[T](nodes.length - 1, this)
-    val rights = new RTreeNode[T](nodes.length - 1, this) 
+    val lefts  = new RTreeNode[T](current.tree)
+    val rights = new RTreeNode[T](current.tree)
     var leftPos   = nodes(maxLeft) .position
     var rightPos  = nodes(maxRight).position
     lefts  + nodes(maxLeft )
@@ -86,7 +90,11 @@ object QuadraticPartitioner extends Partitioner {
     (lefts, rights)
   }
 
-  override def split[T](nodes : Array[RTreeNode[T]]) : (RTreeNode[T], RTreeNode[T]) = {
+  override def split[T](
+    nodes   : Array[RTreeNode[T]],
+    current : RTreeNode[T],
+    score   : Double
+  ) : (RTreeNode[T], RTreeNode[T]) = {
     val set = new BitSet(nodes.length)
     var maxArea  = (nodes(0).rectangle + nodes(1).rectangle).area1p
     var maxLeft  =  0
@@ -107,8 +115,8 @@ object QuadraticPartitioner extends Partitioner {
     }
     set.set(maxLeft )
     set.set(maxRight)
-    val lefts  = new RTreeNode[T](nodes(0).width, this)
-    val rights = new RTreeNode[T](nodes(0).width, this)
+    val lefts  = new RTreeNode[T](current.tree)
+    val rights = new RTreeNode[T](current.tree)
     var leftRect  = nodes(maxLeft) .rectangle
     var rightRect = nodes(maxRight).rectangle
     var leftArea  = leftRect.area1p

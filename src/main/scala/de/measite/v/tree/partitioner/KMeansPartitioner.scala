@@ -135,7 +135,7 @@ object KMeansPartitioner {
     kmeans : int,
     width  : int
   ) : RTreeNode[T] = {
-    val partitioner = nodes(0).parent.asInstanceOf[RTreeNode[T]].partitioner
+    val tree = nodes(0).parent.asInstanceOf[RTreeNode[T]].tree
     val cluster = isplit[RTreeLeaf[T]](
       nodes,
       kmeans,
@@ -146,12 +146,12 @@ object KMeansPartitioner {
     // generate an array of RTreeNodes
     val inodes = new Array[RTreeNode[T]](kmeans)
     for (i <- 0 until kmeans) {
-      inodes(i) = new RTreeNode[T](width, partitioner)
+      inodes(i) = new RTreeNode[T](tree)
     }
     for (i <- 0 until nodes.length) {
       inodes(cluster(i)) + nodes(i)
     }
-    val result = new RTreeNode[T](width, partitioner)
+    val result = new RTreeNode[T](tree)
     inodes.foreach(in => { result + in })
     result
   }
@@ -161,7 +161,7 @@ object KMeansPartitioner {
     kmeans : int,
     width  : int
   ) : RTreeNode[T] = {
-    val partitioner = nodes(0).partitioner
+    val tree = nodes(0).tree
     val cluster = isplit[RTreeNode[T]](
       nodes,
       kmeans,
@@ -177,12 +177,12 @@ object KMeansPartitioner {
     // generate an array of RTreeNodes
     val inodes = new Array[RTreeNode[T]](kmeans)
     for (i <- 0 until kmeans) {
-      inodes(i) = new RTreeNode[T](width, partitioner)
+      inodes(i) = new RTreeNode[T](tree)
     }
     for (i <- 0 until nodes.length) {
       inodes(cluster(i)) + nodes(i)
     }
-    val result = new RTreeNode[T](width, partitioner)
+    val result = new RTreeNode[T](tree)
     inodes.foreach(in => { result + in })
     result
   }

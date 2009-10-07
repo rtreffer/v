@@ -11,11 +11,19 @@ trait Partitioner {
   /**
    * Split leaf content into two new nodes
    */
-  def split[T](nodes : Array[RTreeLeaf[T]]) : (RTreeNode[T], RTreeNode[T])
+  def split[T](
+    nodes   : Array[RTreeLeaf[T]],
+    current : RTreeNode[T],
+    score   : Double
+  ) : (RTreeNode[T], RTreeNode[T])
 
   /**
    * Split node content into two new nodes
    */
-  def split[T](nodes : Array[RTreeNode[T]]) : (RTreeNode[T], RTreeNode[T])
+  def split[T](
+    nodes   : Array[RTreeNode[T]],
+    current : RTreeNode[T],
+    score   : Double
+  ) : (RTreeNode[T], RTreeNode[T])
 
 }
