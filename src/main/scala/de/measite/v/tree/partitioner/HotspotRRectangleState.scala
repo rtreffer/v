@@ -1,10 +1,11 @@
 package de.measite.v.tree.partitioner
 
 import de.measite.v.data.RRectangle
-import de.measite.v.data.DataHelper._
+import de.measite.v.data.DataHelper
 import de.measite.v.searchtree.State
 
 import java.util.ArrayList
+import java.lang.Double._
 
 class HotspotRRectangleState(
   val rect       : Array[RRectangle],
@@ -14,11 +15,12 @@ class HotspotRRectangleState(
   var left         : RRectangle = RRectangle.NULL
   var right        : RRectangle = RRectangle.NULL
   var intersection : RRectangle = RRectangle.NULL
-  var score    = 1d
-  val state    = new Array[int](rect.length)
-  var pos      = 0
-  var leftSet  = 0
-  var rightSet = 0
+  var score       = 1d
+  var _exactScore = Double.NaN
+  val state       = new Array[int](rect.length)
+  var pos         = 0
+  var leftSet     = 0
+  var rightSet    = 0
 
   def this(that: HotspotRRectangleState, set: int) = {
     this(that.rect, that.uniqueArea)
@@ -66,7 +68,7 @@ class HotspotRRectangleState(
     } else {
       right.area
     }
-    val la = if (isNaN(intersection.area) || intersection.area <= 0d) {
+    val ia = if (isNaN(intersection.area) || intersection.area <= 0d) {
       0d
     } else {
       intersection.area
@@ -81,10 +83,10 @@ class HotspotRRectangleState(
 
   def exactScore() : Double = {
     if (isNaN(_exactScore)) {
-      val larray = new Array[RRectangle[leftSet]]
-      val lpos   = 0
-      val rarray = new Array[RRectangle[rightSet]]
-      val rpos   = 0
+      val larray = new Array[RRectangle](leftSet)
+      var lpos   = 0
+      val rarray = new Array[RRectangle](rightSet)
+      var rpos   = 0
       val clist  = new ArrayList[RRectangle](rect.length)
       var i = 0
       while (i <= pos) {
@@ -108,9 +110,9 @@ class HotspotRRectangleState(
         carray(i) = clist.get(i)
         i += 1
       } 
-      val la = uniqueArea(larray)
-      val ra = uniqueArea(rarray)
-      val ca = uniqueArea(carray)
+      val la = DataHelper.uniqueArea(larray)
+      val ra = DataHelper.uniqueArea(rarray)
+      val ca = DataHelper.uniqueArea(carray)
       _exactScore = Math.sqrt(
         score * score *
         ((la - ca) / left.area + (ra - ca) / right.area)*0.5
