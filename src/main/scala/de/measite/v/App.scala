@@ -15,9 +15,9 @@ object App extends Application {
   val rnd = new java.util.Random(31337);
   // Step 1: generate a 1'000'000 10d vectors
   System.out.println("(1) vectors");
-  val vector = new Array[KVector](100000)
+  val vector = new Array[KVector](10000)
   for (i <- 0 until vector.length) {
-    val v = new Array[Double](100)
+    val v = new Array[Double](10)
     for (j <- 0 until v.length) {
       v(j) = rnd.nextDouble
     }
@@ -28,7 +28,7 @@ object App extends Application {
   }
   // Step 2: build a tree
   System.out.println("(2) tree");
-  var tree = new RTree[String](100, HotspotPartitioner)
+  var tree = new RTree[String](6, HotspotPartitioner)
   for (i <- 0 until vector.length) {
     tree + vector(i)
     if ((i + 1) % 1000 == 0) {
@@ -83,7 +83,7 @@ object App extends Application {
     iter = tree.search(v, stats)
     for (i <- 0 until 100) {
       iter.next
-//      System.out.println("#" + i + ", v:" + stats.visits + ", e:" + stats.expands + " in " + stats.runtime + "ms");
+      System.out.println("#" + i + ", v:" + stats.visits + ", e:" + stats.expands + " in " + stats.runtime + "ms");
     }
     time += System.currentTimeMillis
     System.out.println("Time for 100 elements: " + time + "ms instead of " + rtime + "ms");

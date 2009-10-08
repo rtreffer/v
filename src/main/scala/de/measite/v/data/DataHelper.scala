@@ -19,6 +19,11 @@ object DataHelper {
 
   private def _uniqueArea(rect : ArrayList[RRectangle]) : Double = {
     if (rect.size == 0) { return 0d }
+    if (rect.size == 1) { return rect.get(0).area }
+    if (rect.size == 2) {
+      return rect.get(0).area + rect.get(1).area -
+             rect.get(0).intersection(rect.get(1)).area
+    }
     val list = new ArrayList[RRectangle](rect.size)
     var i = 0
     var area = 0d
@@ -29,19 +34,16 @@ object DataHelper {
       while (j < rect.size && !contained) {
         val inter = r.intersection(rect.get(j))
         if (inter eq r) {
-          // we are contained in rect[j]
           contained = true
         } else
         if (inter eq rect.get(j)) {
           contained = true
           rect.set(j,r)
-        } else {
-          val area  = inter.area
-          if (area > 0d) {
-            list.add(inter)
-          }
-          j += 1
+        } else
+        if (inter ne RRectangle.NULL) {
+          list.add(inter)
         }
+        j += 1
       }
       if (!contained) {
         area += r.area

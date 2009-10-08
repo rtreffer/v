@@ -1,6 +1,6 @@
 package de.measite.v.tree.partitioner
 
-import de.measite.v.data.{KVector, RRectangle}
+import de.measite.v.data.{KVector, RRectangle, DataHelper}
 import de.measite.v.tree.{RTreeLeaf, RTreeNode}
 import de.measite.v.searchtree.AbstractPriorityIterator
 import java.util.Comparator
@@ -75,7 +75,7 @@ object HotspotPartitioner extends Partitioner {
         state  = iter.next
     var bestScore = state.score
     var bestState = state
-    while (state != null && state.score > bestScore) {
+    while (state != null && state.score >= bestScore) {
       val sscore = state.exactScore
       if (sscore > bestScore) {
         bestScore = sscore
@@ -100,7 +100,38 @@ object HotspotPartitioner extends Partitioner {
     current : RTreeNode[T],
     score   : Double
   ) : (RTreeNode[T], RTreeNode[T]) = {
-    null
+    val rectangles = new Array[RRectangle](nodes.length)
+    var i = 0
+    while (i < rectangles.length) {
+      rectangles(i) = nodes(i).rectangle
+      i += 1
+    }
+    var state = new HotspotRRectangleState(
+      rectangles,
+      DataHelper.uniqueArea(rectangles)
+    )
+    val iter  = new RRectanglePriorityIterator(state.next()(0))
+        state = iter.next
+    var bestScore = state.score
+    var bestState = state
+    while (state != null && state.score >= bestScore) {
+      val exactScore = state.exactScore
+      if (exactScore > bestScore) {
+        bestScore = exactScore
+        bestState = state
+      }
+      state = iter.next
+    }
+    state = bestState
+    val left  = new RTreeNode[T](current.tree)
+    val right = new RTreeNode[T](current.tree)
+    i = 0
+    while (i < nodes.length) {
+      val side = if (state.state(i) == -1) { left } else { right }
+          side + nodes(i)
+      i += 1
+    }
+    (left, right)
   }
 
 }
