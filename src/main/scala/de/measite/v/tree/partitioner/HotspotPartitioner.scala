@@ -9,7 +9,7 @@ import java.util.ArrayList
 class KVectorPriorityIterator(__start: HotspotKVectorState)
   extends AbstractPriorityIterator[HotspotKVectorState, HotspotKVectorState]
 {
-  def start               = __start
+  def start = __start
   def terminal(
     element : HotspotKVectorState
   ) : HotspotKVectorState = {
@@ -22,6 +22,30 @@ class KVectorPriorityIterator(__start: HotspotKVectorState)
   }
   def score(
     element : HotspotKVectorState
+  ) = {
+    Array(element.score, element.pos.asInstanceOf[Double])
+  }
+}
+
+class RRectanglePriorityIterator(__start: HotspotRRectangleState)
+  extends AbstractPriorityIterator[
+    HotspotRRectangleState,
+    HotspotRRectangleState
+  ]
+{
+  def start = __start
+  def terminal(
+    element : HotspotRRectangleState
+  ) : HotspotRRectangleState = {
+    if (element.isTerminal && element.isValid) { element } else { null }
+  }
+  def expand(
+    element : HotspotRRectangleState
+  ) : Array[HotspotRRectangleState] = {
+    element.next()
+  }
+  def score(
+    element : HotspotRRectangleState
   ) = {
     Array(element.score, element.pos.asInstanceOf[Double])
   }
@@ -76,7 +100,7 @@ object HotspotPartitioner extends Partitioner {
     current : RTreeNode[T],
     score   : Double
   ) : (RTreeNode[T], RTreeNode[T]) = {
-    QuadraticPartitioner.split(nodes, current, score)
+    null
   }
 
 }
