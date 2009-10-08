@@ -2,6 +2,10 @@ package de.measite.v.data
 
 import java.lang.Double.isNaN
 
+object RRectangle {
+  val NULL = new RRectangle()
+}
+
 /**
  * A RRectangle is the Rectangle spawned by a minimum and maximum vector.
  *
