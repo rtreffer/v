@@ -87,19 +87,6 @@ object App extends Application {
     }
     time += System.currentTimeMillis
     System.out.println("Time for 100 elements: " + time + "ms instead of " + rtime + "ms");
-    time  = -System.currentTimeMillis
-    tree.optimize
-    time +=  System.currentTimeMillis
-    System.out.println("Time for optimize: " + time + "ms")
-    stats = new SearchStatistic
-    time = -System.currentTimeMillis
-    iter = tree.search(v, stats)
-    for (i <- 0 until 100) {
-      iter.next
-      System.out.println("#" + i + ", v:" + stats.visits + ", e:" + stats.expands + " in " + stats.runtime + "ms");
-    }
-    time += System.currentTimeMillis
-    System.out.println("Time for 100 elements: " + time + "ms instead of " + rtime + "ms");
   }
   System.exit(0);
 
