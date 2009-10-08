@@ -3,7 +3,7 @@ package de.measite.v.data
 import java.lang.Double._
 import java.util.ArrayList
 
-object DataHeltper {
+object DataHelper {
 
   def uniqueArea(rect : Array[RRectangle]) : Double = {
     var list = new ArrayList[RRectangle](rect.length + 1)
