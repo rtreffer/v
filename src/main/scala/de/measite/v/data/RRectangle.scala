@@ -130,6 +130,7 @@ class RRectangle(
         maxlow.dimension.length,
         minhigh.dimension.length
       )
+    var isNull = true
     val low  = new Array[Double](len)
     val high = new Array[Double](len)
     var i = 0;
@@ -139,13 +140,18 @@ class RRectangle(
       if (!isNaN(l) && !isNaN(h) && l <= h) {
         low(i)  = l
         high(i) = h
+        isNull = false
       } else {
         low(i)  = Double.NaN
         high(i) = Double.NaN
       }
       i += 1
     }
-    new RRectangle(new KVector(low), new KVector(high))
+    if (isNull) {
+      RRectangle.NULL
+    } else {
+      new RRectangle(new KVector(low), new KVector(high))
+    }
   }
 
   def union(that : RRectangle) : Array[RRectangle] = {
