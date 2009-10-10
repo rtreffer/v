@@ -163,6 +163,40 @@ class RRectangle(
     }
   }
 
+  def split(
+    dim   : Int,
+    value : Double
+  ) : (RRectangle, RRectangle) = {
+    val thislen = this.low.dimension.length
+
+    if (dim >= thislen) {
+      if (value >= 0d) { return (this, null) }
+      if (value <  0d) { return (null, this) }
+      return (this, null)
+    }
+
+    val l = this.low.dimension(dim)
+    if (isNaN(l))   {
+      if (value >= 0d) { return (this, null) }
+      if (value <  0d) { return (null, this) }
+      return (null, this)
+    }
+    if (l >= value)    { return (this, null) }
+
+    val h = this.high.dimension(dim)
+
+    if (h <= value)    { return (null, this) }
+    if (l == h)        { return (null, this) }
+
+    val splitLow  = new Array[Double](thislen)
+    val splitHigh = new Array[Double](thislen)
+    System.arraycopy(low.dimension,  0, splitLow,  0, thislen)
+    System.arraycopy(high.dimension, 0, splitHigh, 0, thislen)
+    splitLow(dim)  = value
+    splitHigh(dim) = value
+    (new RRectangle(low, new KVector(splitHigh)), new RRectangle(new KVector(splitLow), high))
+  }
+
   def union(that : RRectangle) : Array[RRectangle] = {
     // TODO
     var lcr = true
