@@ -141,9 +141,14 @@ class RRectangle(
     while (i < len) {
       val l = maxlow.dimension(i)
       val h = minhigh.dimension(i)
-      if (!isNaN(l) && !isNaN(h) && l <= h) {
-        low(i)  = l
-        high(i) = h
+      if (!isNaN(l) && !isNaN(h)) {
+        if (l <= h) {
+          low(i)  = l
+          high(i) = h
+        } else {
+          // no intersectiont in this dimension == no intersection at all
+          return RRectangle.NULL
+        }
         isNull = false
       } else {
         low(i)  = Double.NaN
